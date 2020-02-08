@@ -1,0 +1,3 @@
+[submodule "node_modules/custom-request-promise"]
+	path = node_modules/custom-request-promise
+	url = https://github.com/Supinic/custom-request-promise
