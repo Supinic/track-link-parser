@@ -5,7 +5,7 @@
   },
   "deprecated": false,
   "dependencies": {
-    "custom-request-promise": "custom-request-promise",
+    "custom-request-promise": "github:supinic/custom-request-promise",
     "fast-xml-parser": "latest"
   },
   "description": "Parses many various video/audio sharing sites' links into a compact version",
