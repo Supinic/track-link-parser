@@ -13,7 +13,7 @@ module.exports = (function () {
 			const parserConstructors = {};
 
 			for (const file of usedParsers) {
-				parserConstructors[file] = require(__dirname + "/" + file + ".js")(TemplateClass);
+				parserConstructors[file] = require(__dirname + "/parsers/" + file + ".js")(TemplateClass);
 			}
 
 			for (const [target, params] of Object.entries(options)) {
