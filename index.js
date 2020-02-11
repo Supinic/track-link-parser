@@ -1,7 +1,7 @@
 module.exports = (function () {
 	"use strict";
 
-	const TemplateClass = require(__dirname + "/template.js");
+	const TemplateClass = require(__dirname + "/parsers/template.js");
 	const parserList = ["youtube", "vimeo", "nicovideo", "bilibili", "soundcloud" /*, "vk" */];
 
 	return class TrackLinkParser {
@@ -9,7 +9,7 @@ module.exports = (function () {
 		#parsers = {};
 
 		constructor (options = {}) {
-			const usedParsers = options.use ?? parserList;
+			const usedParsers = options.use || parserList;
 			const parserConstructors = {};
 
 			for (const file of usedParsers) {
