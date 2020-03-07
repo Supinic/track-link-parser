@@ -1,7 +1,7 @@
 module.exports = (function (TemplateParser) {
 	"use strict";
 
-	const request = require("custom-request-promise");
+	const got = require("got");
 	const crypto = require("crypto");
 
 	class BilibiliParser extends TemplateParser {
@@ -17,13 +17,13 @@ module.exports = (function (TemplateParser) {
 		 * @param {string} videoID
 		 * @returns {Promise<string>}
 		 */
-		#fetch = (videoID) => request({
+		#fetch = (videoID) => got({
 			method: "GET",
 			url: `${this.#url}?id=${videoID.replace("av", "")}&appkey=${this.#options.appKey}`,
 			headers: {
 				"User-Agent": this.#options.userAgentDescription || "Not defined"
 			}
-		});
+		}).json();
 
 		/**
 		 * Fetches extra Bilibili video data using its cid, an app key and an access token.
@@ -33,10 +33,10 @@ module.exports = (function (TemplateParser) {
 		#fetchExtra = (cid) => {
 			const params = `appkey=${this.#options.appKey}&cid=${cid}&otype=json`;
 			const hash = crypto.createHash("md5").update(params + this.#options.token).digest("hex");
-			return request({
+			return got({
 				method: "GET",
 				url: this.#extraURL + "?" + params + "&sign=" + hash
-			});
+			}).json();
 		};
 
 		/**
@@ -44,13 +44,13 @@ module.exports = (function (TemplateParser) {
 		 * @param videoID
 		 * @returns {Promise<string> | *}
 		 */
-		#fetchTags = (videoID) => request({
+		#fetchTags = (videoID) => got({
 			method: "GET",
 			url: `${this.#tagsURL}?aid=${videoID.replace("av", "")}`,
 			headers: {
 				"User-Agent": this.#options.userAgentDescription || "Not defined"
 			}
-		});
+		}).json();
 
 		constructor (options) {
 			super();
@@ -83,12 +83,12 @@ module.exports = (function (TemplateParser) {
 		}
 
 		async checkAvailable (videoID) {
-			const data = JSON.parse(await this.#fetch(videoID));
+			const data = await this.#fetch(videoID);
 			return (data.code !== -400);
 		}
 
 		async fetchData (videoID) {
-			const data = JSON.parse(await this.#fetch(videoID));
+			const data = await this.#fetch(videoID);
 			if (data.code === "40001") {
 				return {
 					message: "Temporarily rate limited",
@@ -97,8 +97,8 @@ module.exports = (function (TemplateParser) {
 			}
 			else if (data.code !== -400 && data.code !== -404) {
 				const [extraData, tagsData] = await Promise.all([
-					(async () => JSON.parse(await this.#fetchExtra(data.cid)))(),
-					(async () => JSON.parse(await this.#fetchTags(videoID)))(),
+					(async () => await this.#fetchExtra(data.cid))(),
+					(async () => await this.#fetchTags(videoID))(),
 				]);
 
 				let duration = null;

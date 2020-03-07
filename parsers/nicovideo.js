@@ -1,7 +1,7 @@
 module.exports = (function (TemplateParser) {
 	"use strict";
 
-	const request = require("custom-request-promise");
+	const got = require("got");
 	const xmlParser = require("fast-xml-parser");
 
 	class NicovideoParser extends TemplateParser {
@@ -15,7 +15,7 @@ module.exports = (function (TemplateParser) {
 		 * @param {string} videoID
 		 * @returns {Promise<string>}
 		 */
-		#fetch = (videoID) => request(this.#url + videoID);
+		#fetch = (videoID) => got(this.#url + videoID).json();
 
 		constructor (options) {
 			super();

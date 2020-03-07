@@ -1,7 +1,7 @@
 module.exports = (function (TemplateParser) {
 	"use strict";
 
-	const request = require("custom-request-promise");
+	const got = require("got");
 	const fixHTML = (string) => string.replace(/&#?(?<identifier>[a-z0-9]+);/g, (...params) => {
 		const {identifier} = params.pop();
 		return String.fromCharCode(Number(identifier));
@@ -19,7 +19,7 @@ module.exports = (function (TemplateParser) {
 		 * @param {string} videoID
 		 * @returns {Promise<string>}
 		 */
-		#fetch = (videoID) => request({
+		#fetch = (videoID) => got({
 			url: `${this.#url}&video=${videoID}`,
 			encoding: null,
 			headers: {
@@ -27,7 +27,7 @@ module.exports = (function (TemplateParser) {
 				Accept: "text/html;charset=UTF-8",
 				// "Accept-Language": "ru-RU"
 			}
-		});
+		}).text();
 
 		constructor (options) {
 			super();

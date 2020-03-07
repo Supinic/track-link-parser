@@ -1,7 +1,7 @@
 module.exports = (function (TemplateParser) {
 	"use strict";
 
-	const request = require("custom-request-promise");
+	const got = require("got");
 
 	class SoundcloudParser extends TemplateParser {
 		#url = "https://api.soundcloud.com/resolve/";
@@ -12,7 +12,7 @@ module.exports = (function (TemplateParser) {
 		 * @param {string} videoURL
 		 * @returns {Promise<string>}
 		 */
-		#fetch = (videoURL) => request(`${this.#url}?url=${videoURL}&client_id=${this.#options.key}`);
+		#fetch = (videoURL) => got(`${this.#url}?url=${videoURL}&client_id=${this.#options.key}`).json();
 
 		constructor (options = {}) {
 			super();
@@ -43,12 +43,12 @@ module.exports = (function (TemplateParser) {
 		}
 
 		async checkAvailable (videoURL) {
-			const data = JSON.parse(await this.#fetch(videoURL));
+			const data = await this.#fetch(videoURL);
 			return !data.errors;
 		}
 
 		async fetchData (videoURL) {
-			const data = JSON.parse(await this.#fetch(videoURL));
+			const data = await this.#fetch(videoURL);
 
 			if (data.errors) {
 				return null;

@@ -1,12 +1,10 @@
 module.exports = (function (TemplateParser) {
 	"use strict";
 
-	const request = require("custom-request-promise");
+	const got = require("got");
 
 	const thumbnailSizes = ["maxres", "high", "medium", "small", "default"];
 	const durationRegex = /PT((?<hours>\d+)H)?((?<minutes>\d+)M)?((?<seconds>\d+)S)?/g;
-	const idTestRegex = /^[^#&?]{11}$/;
-	const splitRegex = /[/&?=#.\s]/g;
 	const noUrlRegex = /[a-zA-z0-9\-_]{11}/;
 	const patterns = [
 		/youtu\.be\/([a-zA-z0-9\-_]{11})/, // youtu.be/<id>
@@ -70,11 +68,7 @@ module.exports = (function (TemplateParser) {
 		}
 
 		async checkAvailable (videoID) {
-			const data = JSON.parse(await request({
-				method: "GET",
-				url: this.#url(videoID)
-			}));
-
+			const data = await got(this.#url(videoID)).json();
 			return Boolean(data.items.find(i => i.id === videoID));
 		}
 
@@ -84,10 +78,8 @@ module.exports = (function (TemplateParser) {
 		 * @returns {Object|null}
 		 */
 		async fetchData (videoID) {
-			const data = JSON.parse(await request({
-				method: "GET",
-				url: this.#url(videoID)
-			})).items.find(i => i.id === videoID);
+			const rawData = await got(this.#url(videoID)).json();
+			const data = rawData.items.find(i => i.id === videoID);
 
 			if (!data) {
 				return null;

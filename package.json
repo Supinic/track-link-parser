@@ -5,7 +5,7 @@
   },
   "deprecated": false,
   "dependencies": {
-    "custom-request-promise": "github:supinic/custom-request-promise",
+    "got": "latest",
     "fast-xml-parser": "latest"
   },
   "description": "Parses many various video/audio sharing sites' links into a compact version",
@@ -15,5 +15,5 @@
   "main": "index.js",
   "name": "track-link-parser",
   "private": true,
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

@@ -1,7 +1,7 @@
 module.exports = (function (TemplateParser) {
 	"use strict";
 
-	const request = require("custom-request-promise");
+	const got = require("got");
 	const urlRegex = /vimeo\.com\/(\d+)/;
 	const noUrlRegex = /(\d{8,9})/;
 	
@@ -13,10 +13,10 @@ module.exports = (function (TemplateParser) {
 		 * Fetches a Vimeo video data using a free JSON access point.
 		 * @param videoID
 		 */
-		#fetchJSON = (videoID) => request({
+		#fetchJSON = (videoID) => got({
 			method: "GET",
 			url: this.#jsonURL(videoID)
-		});
+		}).json();
 
 		parseLink (link) {
 			const match = link.match(urlRegex);
@@ -44,10 +44,7 @@ module.exports = (function (TemplateParser) {
 
 		async fetchData (videoID) {
 			try {
-				const data = JSON.parse(await this.#fetchJSON(videoID))[0];
-
-				console.log("Vimeo link parser", data);
-
+				const [data] = await this.#fetchJSON(videoID);
 				return {
 					type: "vimeo",
 					ID: data.id,
