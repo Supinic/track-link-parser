@@ -4,7 +4,7 @@ module.exports = (function (TemplateParser) {
 	const got = require("got");
 
 	class SoundcloudParser extends TemplateParser {
-		#url = "https://api.soundcloud.com/resolve/";
+		#url = "https://api-v2.soundcloud.com/resolve/";
 		#options = {};
 
 		/**
