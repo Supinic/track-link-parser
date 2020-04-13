@@ -30,7 +30,7 @@ module.exports = (function (TemplateParser) {
 				resolveBodyOnly: true,
 			}));
 			const json = NicovideoParser.#createStreamRequestBody(videoInfo.video.dmcInfo.session_api);
-			const streamInfo = JSON.parse(await got("https://api.dmc.nico/api/sessions", {
+			const streamInfo = await got("https://api.dmc.nico/api/sessions", {
 				method: "POST",
 				searchParams: {
 					_format: "json"
@@ -38,7 +38,7 @@ module.exports = (function (TemplateParser) {
 				json,
 				headers: {"Content-Type": "application/json"},
 				resolveBodyOnly: true,
-			}));
+			}).json();
 			return [videoInfo, streamInfo.data.session.content_uri];
 		};
 
