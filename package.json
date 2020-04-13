@@ -6,7 +6,8 @@
   "deprecated": false,
   "dependencies": {
     "got": "latest",
-    "fast-xml-parser": "latest"
+    "fast-xml-parser": "latest",
+    "unescape": "latest"
   },
   "description": "Parses many various video/audio sharing sites' links into a compact version",
   "engines": {
