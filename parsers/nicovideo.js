@@ -42,17 +42,17 @@ module.exports = (function (TemplateParser) {
 			return [videoInfo, streamInfo.data.session.content_uri];
 		};
 
-		constructor(options) {
+		constructor (options) {
 			super();
 			this.#options = options;
 		}
 
-		parseLink(link) {
+		parseLink (link) {
 			const match = link.match(this.#urlRegex);
 			return match ? match[1] : null;
 		}
 
-		checkLink(link, noURL) {
+		checkLink (link, noURL) {
 			if (noURL) {
 				return this.#noUrlRegex.test(link);
 			} else {
@@ -60,12 +60,12 @@ module.exports = (function (TemplateParser) {
 			}
 		}
 
-		async checkAvailable(videoID) {
+		async checkAvailable (videoID) {
 			const doc = await got(this.#url + videoID);
 			return doc && doc.body.match(this.#envRegex);
 		}
 
-		async fetchData(videoID) {
+		async fetchData (videoID) {
 			const [{video, owner, thread, tags}, link] = await this.#fetch(videoID);
 
 
