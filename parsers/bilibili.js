@@ -6,10 +6,11 @@ module.exports = (function (TemplateParser) {
 
 	class BilibiliParser extends TemplateParser {
 		#url = "http://api.bilibili.cn/view";
+		#bvUrl = "http://api.bilibili.cn/x/web-interface/view";
 		#extraURL = "http://interface.bilibili.com/v2/playurl";
 		#tagsURL = "https://api.bilibili.com/x/tag/archive/tags";
 		#options = {};
-		#urlRegex = /bilibili\.com\/video\/(av\d+(\/p\?=\d+)?)/;
+		#urlRegex = /bilibili\.com\/video\/((av\d+)|((bv|BV)1[\w\d]+)(\/p\?=\d+)?)/;
 		#noUrlRegex = /(av\d{8,9})/;
 
 		/**
@@ -17,13 +18,42 @@ module.exports = (function (TemplateParser) {
 		 * @param {string} videoID
 		 * @returns {Promise<string>}
 		 */
-		#fetch = (videoID) => got({
-			method: "GET",
-			url: `${this.#url}?id=${videoID.replace("av", "")}&appkey=${this.#options.appKey}`,
-			headers: {
-				"User-Agent": this.#options.userAgentDescription || "Not defined"
+		#fetch = async (videoID) => {
+			const originalVideoID = videoID;
+			let replaced = false;
+
+			// If the video starts with a "BV1" token, fetch its AV token ID first.
+			if (/^bv1/i.test(videoID)) {
+				const proper = await got({
+					url: this.#bvUrl,
+					searchParams: `bvid=${videoID}`
+				}).json();
+
+				if (proper?.data?.aid) {
+					replaced = true;
+					videoID = "av" + proper.data.aid;
+				}
+				else {
+					return null;
+				}
 			}
-		}).json();
+
+			const parsedVideoID = videoID.replace(/^av/, "");
+			const data = await got({
+				method: "GET",
+				url: `${this.#url}?id=${parsedVideoID}&appkey=${this.#options.appKey}`,
+				headers: {
+					"User-Agent": this.#options.userAgentDescription || "Not defined"
+				}
+			}).json();
+
+			return {
+				data,
+				replaced,
+				originalVideoID,
+				videoID
+			}
+		};
 
 		/**
 		 * Fetches extra Bilibili video data using its cid, an app key and an access token.
@@ -83,22 +113,29 @@ module.exports = (function (TemplateParser) {
 		}
 
 		async checkAvailable (videoID) {
-			const data = await this.#fetch(videoID);
+			const { data } = await this.#fetch(videoID);
 			return (data.code !== -400);
 		}
 
-		async fetchData (videoID) {
-			const data = await this.#fetch(videoID);
-			if (data.code === "40001") {
+		async fetchData (inputVideoID) {
+			const { data, replaced, videoID } = await this.#fetch(inputVideoID);
+			if (replaced) {
+				inputVideoID = videoID;
+			}
+
+			if (!data || data.code === -400 || data.code === -404) {
+				return null;
+			}
+			else if (data.code === "40001") {
 				return {
 					message: "Temporarily rate limited",
 					originalMessage: "出生日期格式不正确"
 				}
 			}
-			else if (data.code !== -400 && data.code !== -404) {
+			else {
 				const [extraData, tagsData] = await Promise.all([
 					(async () => await this.#fetchExtra(data.cid))(),
-					(async () => await this.#fetchTags(videoID))(),
+					(async () => await this.#fetchTags(inputVideoID))(),
 				]);
 
 				let duration = null;
@@ -111,7 +148,7 @@ module.exports = (function (TemplateParser) {
 				return {
 					type: "bilibili",
 					ID: videoID,
-					link: `https://www.bilibili.com/video/${videoID}`,
+					link: `https://www.bilibili.com/video/${inputVideoID}`,
 					name: data.title,
 					author: data.author,
 					authorID: data.mid,
@@ -138,9 +175,6 @@ module.exports = (function (TemplateParser) {
 							: []
 					}
 				};
-			}
-			else {
-				return null;
 			}
 		}
 	}
