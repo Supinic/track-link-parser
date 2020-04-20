@@ -15,7 +15,7 @@ module.exports = (function (TemplateParser) {
 		 * @param {string} videoID
 		 * @returns {Promise<string>}
 		 */
-		#fetch = (videoID) => got(this.#url + videoID).json();
+		#fetch = (videoID) => got(this.#url + videoID).text();
 
 		constructor (options) {
 			super();
