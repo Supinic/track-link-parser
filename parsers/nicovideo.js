@@ -7,6 +7,7 @@ module.exports = (function (TemplateParser) {
 
 	return class NicovideoParser extends TemplateParser {
 		#url = "https://www.nicovideo.jp/watch/";
+		#sessionUrl = "https://api.dmc.nico/api/sessions";
 		#options = {};
 		#urlRegex = /nicovideo\.jp\/watch\/([s|n]m\d+)/;
 		#noUrlRegex = /(s|nm\d{7,9})/;
@@ -15,7 +16,7 @@ module.exports = (function (TemplateParser) {
 		/**
 		 * Fetches data about a video based on its ID.
 		 * @param {string} videoID
-		 * @returns {Promise<[{video, owner, thread, tags: Array}, string]>}
+		 * @returns {Promise<[{video, owner, thread, tags: Array}, string, Object]>}
 		 */
 		#fetch = async (videoID) => {
 			const url = this.#url + videoID;
@@ -30,7 +31,7 @@ module.exports = (function (TemplateParser) {
 				resolveBodyOnly: true,
 			}));
 			const json = NicovideoParser.#createStreamRequestBody(videoInfo.video.dmcInfo.session_api);
-			const streamInfo = await got("https://api.dmc.nico/api/sessions", {
+			const {data} = await got(this.#sessionUrl, {
 				method: "POST",
 				searchParams: {
 					_format: "json"
@@ -39,7 +40,7 @@ module.exports = (function (TemplateParser) {
 				headers: {"Content-Type": "application/json"},
 				resolveBodyOnly: true,
 			}).json();
-			return [videoInfo, streamInfo.data.session.content_uri];
+			return [videoInfo, data.session.content_uri, data];
 		};
 
 		constructor (options) {
@@ -66,13 +67,14 @@ module.exports = (function (TemplateParser) {
 		}
 
 		async fetchData (videoID) {
-			const [{video, owner, thread, tags}, link] = await this.#fetch(videoID);
+			const [{video, owner, thread, tags}, link, sessionWrapper] = await this.#fetch(videoID);
 
+			const intervalId = this.#makeHeartbeatInterval(sessionWrapper);
 
 			return {
 				type: "nicovideo",
 				ID: video.id,
-				link: link,
+				link: this.#url + videoID,
 				// not sure if that's needed here
 				name: htmlUnescape(video.title),
 				author: owner.nickname || null,
@@ -86,10 +88,45 @@ module.exports = (function (TemplateParser) {
 				// there's also video.largeThumbnailURL
 				thumbnail: video.thumbnailURL || null,
 				extra: {
+					vlcUrl: link,
 					tags: tags && tags.map(tag => tag.name) || [],
+					heartbeat: true,
+					heartbeatId: intervalId,
+					stopHeartbeat: () => clearInterval(intervalId),
 				}
 			};
 		}
+
+		/**
+		 * Initiates and starts the heartbeat
+		 * @param sessionWrapper
+		 * @returns {number} the intervalId
+		 */
+		#makeHeartbeatInterval = (sessionWrapper) =>
+			setInterval(async () => {
+				sessionWrapper = await this.#heartbeat(sessionWrapper).catch((e) => sessionWrapper);
+			}, sessionWrapper.session.keep_method.heartbeat.lifetime / 3);
+
+		/**
+		 * sends a heartbeat to the niconico api
+		 * @param {Object} session
+		 * @returns {Promise<Object>} The new(?) session
+		 */
+		#heartbeat = async (sessionWrapper) =>  {
+			const id = sessionWrapper.session.id;
+			const {data} = await got(`${this.#sessionUrl}/${id}`, {
+				method: "POST",
+				searchParams: {
+					_format: "json",
+					// LuL
+					_method: "PUT"
+				},
+				json: sessionWrapper,
+				headers: {"Content-Type": "application/json"},
+				resolveBodyOnly: true,
+			}).json();
+			return data;
+		};
 
 		/**
 		 *
