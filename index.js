@@ -3,6 +3,7 @@ module.exports = (function () {
 
 	const TemplateClass = require(__dirname + "/parsers/template.js");
 	const parserList = ["youtube", "vimeo", "nicovideo", "bilibili", "soundcloud" /*, "vk" */];
+	const parserConstructors = {};
 
 	return class TrackLinkParser {
 		#options = {};
@@ -10,8 +11,6 @@ module.exports = (function () {
 
 		constructor (options = {}) {
 			const usedParsers = options.use || parserList;
-			const parserConstructors = {};
-
 			for (const file of usedParsers) {
 				parserConstructors[file] = require(__dirname + "/parsers/" + file + ".js")(TemplateClass);
 			}
@@ -128,6 +127,26 @@ module.exports = (function () {
 			}
 			else {
 				return await this.#parsers[type].fetchData(link);
+			}
+		}
+
+		reloadParser (parser, options= {}) {
+			const constructor = parserConstructors[parser];
+			if (!constructor) {
+				throw new sb.Error({
+					message: "Invalid constructor name provided",
+					args: { parser }
+				});
+			}
+
+			try {
+				this.#parsers[parser] = new parserConstructors[parser](options);
+				this.#options[parser] = options;
+				return true;
+			}
+			catch (e) {
+				console.error(e);
+				return false;
 			}
 		}
 
