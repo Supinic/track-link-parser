@@ -57,7 +57,9 @@ module.exports = (function (TemplateParser) {
 				ID: data.video_id,
 				link: "https://www.nicovideo.jp/watch/" + data.video_id,
 				name: data.title,
-				author: data.user_nickname || null,
+				author: (data.user_nickname === null)
+					? null
+					: String(data.user_nickname),
 				authorID: data.user_id,
 				description: data.description,
 				duration: data.length.split(":").map(Number).reduce((acc, cur, ind) => (ind === 0) ? acc += cur * 60 : acc += cur, 0),
