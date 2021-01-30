@@ -11,7 +11,10 @@ module.exports = (function (TemplateParser) {
 		 * @param {string} videoURL
 		 * @returns {Promise<string>}
 		 */
-		#fetch = async (videoURL) => await got(`${this.#url}?url=${videoURL}&client_id=${this.#options.key}`);
+		#fetch = async (videoURL) => await got({
+			url: `${this.#url}?url=${videoURL}&client_id=${this.#options.key}`,
+			throwHttpErrors: false
+		});
 
 		constructor (options = {}) {
 			super();
