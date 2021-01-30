@@ -15,7 +15,6 @@ module.exports = (function (TemplateParser) {
 		#htmlRegex = /<!json>(.*)(-->)?$/;
 
 		/**
-		 * Fetches XML data about a video based on its ID.
 		 * @param {string} videoID
 		 * @returns {Promise<string>}
 		 */

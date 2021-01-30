@@ -8,11 +8,10 @@ module.exports = (function (TemplateParser) {
 		#options = {};
 
 		/**
-		 * Fetches XML data about a video based on its ID.
 		 * @param {string} videoURL
 		 * @returns {Promise<string>}
 		 */
-		#fetch = (videoURL) => got(`${this.#url}?url=${videoURL}&client_id=${this.#options.key}`).json();
+		#fetch = async (videoURL) => await got(`${this.#url}?url=${videoURL}&client_id=${this.#options.key}`);
 
 		constructor (options = {}) {
 			super();
@@ -21,7 +20,7 @@ module.exports = (function (TemplateParser) {
 				throw new Error("Soundcloud parser: options.key is required");
 			}
 
-			this.#options = options;
+			this.#options = { ...options };
 		}
 
 		parseLink (link) {
@@ -43,14 +42,13 @@ module.exports = (function (TemplateParser) {
 		}
 
 		async checkAvailable (videoURL) {
-			const data = await this.#fetch(videoURL);
-			return !data.errors;
+			const { statusCode, body: data } = await this.#fetch(videoURL);
+			return (statusCode === 200 && !data.errors);
 		}
 
 		async fetchData (videoURL) {
 			const data = await this.#fetch(videoURL);
-
-			if (data.errors) {
+			if (statusCode !== 200 || data.errors) {
 				return null;
 			}
 
