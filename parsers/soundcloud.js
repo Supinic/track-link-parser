@@ -50,7 +50,7 @@ module.exports = (function (TemplateParser) {
 		}
 
 		async fetchData (videoURL) {
-			const data = await this.#fetch(videoURL);
+			const { statusCode, body: data } = await this.#fetch(videoURL);
 			if (statusCode !== 200 || data.errors) {
 				return null;
 			}
