@@ -13,7 +13,8 @@ module.exports = (function (TemplateParser) {
 		 */
 		#fetch = async (videoURL) => await got({
 			url: `${this.#url}?url=${videoURL}&client_id=${this.#options.key}`,
-			throwHttpErrors: false
+			throwHttpErrors: false,
+			responseType: "json"
 		});
 
 		constructor (options = {}) {
