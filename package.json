@@ -5,10 +5,10 @@
   },
   "deprecated": false,
   "dependencies": {
-    "got": "latest",
-    "fast-xml-parser": "latest"
+    "fast-xml-parser": "latest",
+    "got": "latest"
   },
-  "description": "Parses many various video/audio sharing sites' links into a compact version",
+  "description": "Parses many various media sharing sites' links into a compact and standardized object data.",
   "engines": {
     "node": ">= 12.0"
   },
