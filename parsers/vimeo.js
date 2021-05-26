@@ -1,3 +1,7 @@
+const got = require("got");
+const urlRegex = /vimeo\.com\/(\d+)/;
+const noUrlRegex = /(\d{8,9})/;
+
 module.exports = class VimeoParser extends require("./template.js") {
 	// #url = "https://api.vimeo.com/videos/";
 	#jsonURL = (videoID) => `https://vimeo.com/api/v2/video/${videoID}.json`;
