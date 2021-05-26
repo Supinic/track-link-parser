@@ -8,6 +8,8 @@ const parserConstructors = {};
  */
 module.exports = class TrackLinkParser {
 	#options = {};
+
+	/** @type {Object<"string", TrackLinkParserTemplate>} */
 	#parsers = {};
 
 	/**
@@ -32,6 +34,13 @@ module.exports = class TrackLinkParser {
 		}
 	}
 
+	/**
+	 * Attempts to detect the website of a media link.
+	 * @param {LinkParserName} link
+	 * @returns {LinkParserName|null} If no website was detected, reutnrs `null`.
+	 * @throws {TypeError} If `link` is not a string.
+	 * @throws {Error} If `link` is an empty string.
+	 */
 	autoRecognize (link) {
 		if (typeof link !== "string") {
 			throw new TypeError("Link parser: link must be a string");
@@ -49,6 +58,15 @@ module.exports = class TrackLinkParser {
 		return null;
 	}
 
+	/**
+	 * Attempts to fetch the media file ID from a URL, either through a provided parser type, or automatically.
+	 * @param {string} link
+	 * @param {LinkParserName|"any"} type = "any" Specific parser name. If `"any"`, every parser will be checked,
+	 * and the first proper value will be returned.
+	 * @throws {TypeError} If `link` or `type` is not a string.
+	 * @throws {Error} If no such parser exists for `type`.
+	 * @throws {Error} When using `"any"`, and no link was able to be parsed.
+	 */
 	parseLink (link, type = "any") {
 		if (typeof link !== "string" || typeof type !== "string") {
 			throw new TypeError("Link parser: Both link and type must be string");
@@ -72,6 +90,14 @@ module.exports = class TrackLinkParser {
 		}
 	}
 
+	/**
+	 * Determines if a link is valid for the provided website parser.
+	 * @param {string} link
+	 * @param {LinkParserName} type
+	 * @returns {boolean}
+	 * @throws {TypeError} If `link` or `type` is not a string.
+	 * @throws {Error} If no such parser exists for `type`.
+	 */
 	checkValid (link, type) {
 		if (typeof link !== "string" || typeof type !== "string") {
 			throw new TypeError("Link parser: Both link and type must be string");
@@ -83,6 +109,14 @@ module.exports = class TrackLinkParser {
 		return this.#parsers[type].checkLink(link);
 	}
 
+	/**
+	 * Determines if a link is still available on the provided website, or checks all parsers.
+	 * @param {string} link
+	 * @param {LinkParserName|"any"} type = "any"
+	 * @returns {boolean}
+	 * @throws {TypeError} If `link` or `type` is not a string.
+	 * @throws {Error} If no such parser exists for `type`.
+	 */
 	async checkAvailable (link, type = "auto") {
 		if (typeof link !== "string" || typeof type !== "string") {
 			throw new TypeError("Link parser: Both link and type must be string");
@@ -112,6 +146,15 @@ module.exports = class TrackLinkParser {
 		}
 	}
 
+	/**
+	 * Fetches the media full data for a provided URL.
+	 * @param {string} link
+	 * @param {LinkParserName|"auto"} type = "auto"
+	 * @returns {Promise<LinkParserFetchResponse>}
+	 * @throws TypeError If link or type are not string.
+	 * @throws {Error} If invalid parser is provided.
+	 * @throws {Error} If parser cannot parse the link provided.
+	 */
 	async fetchData (link, type = "auto") {
 		if (typeof link !== "string" || typeof type !== "string") {
 			throw new TypeError("Link parser: Both link and type must be string");
@@ -135,13 +178,17 @@ module.exports = class TrackLinkParser {
 		}
 	}
 
-	reloadParser (parser, options= {}) {
+	/**
+	 * Reloads a parser, based on its name.
+	 * @param {LinkParserName} parser
+	 * @param {Object} options Options required for the specific parser
+	 * @returns {boolean} Determines the success of the reload operation
+	 * @throws {Error} If invalid parser name is provided.
+	 */
+	reloadParser (parser, options = {}) {
 		const constructor = parserConstructors[parser];
 		if (!constructor) {
-			throw new sb.Error({
-				message: "Invalid constructor name provided",
-				args: { parser }
-			});
+			throw new Error("Invalid constructor name provided");
 		}
 
 		try {
@@ -155,6 +202,11 @@ module.exports = class TrackLinkParser {
 		}
 	}
 
+	/**
+	 * Fetches a parser instance by its name.
+	 * @param {LinkParserName} parser
+	 * @returns {TrackLinkParserTemplate} Parser instance - depending on the website provided.
+	 */
 	getParser (parser) {
 		return this.#parsers[parser];
 	}
