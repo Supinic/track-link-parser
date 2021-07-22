@@ -5,8 +5,8 @@
   },
   "deprecated": false,
   "dependencies": {
-    "fast-xml-parser": "latest",
-    "got": "latest"
+    "fast-xml-parser": "^3.19.0",
+    "got": "^11.8.0"
   },
   "description": "Parses many various media sharing sites' links into a compact and standardized object data.",
   "engines": {
@@ -15,5 +15,5 @@
   "main": "index.js",
   "name": "track-link-parser",
   "private": true,
-  "version": "1.1.0"
+  "version": "1.2.0"
 }
