@@ -1,4 +1,4 @@
-const parserList = ["youtube", "vimeo", "nicovideo", "bilibili", "soundcloud" /*, "vk" */];
+const parserList = ["youtube", "vimeo", "nicovideo", "bilibili", "soundcloud", "dailymotion" /*, "vk" */];
 const parserConstructors = {};
 
 /**
@@ -16,20 +16,35 @@ module.exports = class TrackLinkParser {
 	 * @param {Object} options
 	 */
 	constructor (options = {}) {
-		const usedParsers = options.use || parserList;
+		let usedParsers = parserList;
+		if (options.use) {
+			if (typeof options.use === "string") {
+				usedParsers = [options.use];
+			}
+			else if (Array.isArray(options.use)) {
+				usedParsers = options.use;
+			}
+			else {
+				throw new Error("options.use must be a string or array of strings");
+			}
+		}
+
 		for (const file of usedParsers) {
 			parserConstructors[file] = require("./parsers/" + file + ".js");
 		}
 
 		for (const [target, params] of Object.entries(options)) {
-			if (!parserList.includes(target.toLowerCase())) {
+			if (target === "use") {
+				continue;
+			}
+			else if (!parserList.includes(target.toLowerCase())) {
 				throw new Error("Link parser: unrecognized options for key " + target);
 			}
 
 			this.#options[target] = params;
 		}
 
-		for (const parser of parserList) {
+		for (const parser of usedParsers) {
 			this.#parsers[parser] = new parserConstructors[parser](this.#options[parser] || {});
 		}
 	}
