@@ -43,7 +43,7 @@ module.exports = class TrackLinkParserTemplate {
 };
 
 /**
- * @typedef {"bilibili"|"nicovideo"|"soundcloud"|"vimeo"|"vk"|"youtube"} LinkParserName
+ * @typedef {"bilibili"|"dailymotion"|"nicovideo"|"soundcloud"|"vimeo"|"vk"|"youtube"} LinkParserName
  */
 
 /**
@@ -61,6 +61,6 @@ module.exports = class TrackLinkParserTemplate {
  * @property {number|null} comments Amount of comments.
  * @property {number|null} likes Amount of likes. Dislikes are not available across websites in general, hence they're not included here.
  * @property {string|null} thumbnail Video thumbnail, if available.
- * @property {BilibiliParserData|NicovideoParserData|SoundcloudParserData|VimeoParserData|YoutubeParserData} extra
+ * @property {BilibiliParserData|DailymotionData|NicovideoParserData|SoundcloudParserData|VimeoParserData|YoutubeParserData} extra
  * Website-specific extra data, depends on the parser instance used.
  */
