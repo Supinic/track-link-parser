@@ -109,6 +109,8 @@ module.exports = class BilibiliParser extends require("./template.js") {
 		const extraDataPromise = got({
 			method: "GET",
 			url: `http://interface.bilibili.com/v2/playurl`,
+			timeout: 10_000,
+			retry: 0,
 			searchParams: {
 				appkey: this.#options.appKey,
 				cid: data.cid,
@@ -120,6 +122,8 @@ module.exports = class BilibiliParser extends require("./template.js") {
 		const tagsPromise = got({
 			method: "GET",
 			url: "http://api.bilibili.com/x/tag/archive/tags",
+			timeout: 10_000,
+			retry: 0,
 			throwHttpErrors: false,
 			responseType: "json",
 			searchParams: {
