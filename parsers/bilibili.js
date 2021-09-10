@@ -4,8 +4,6 @@ const crypto = require("crypto");
 module.exports = class BilibiliParser extends require("./template.js") {
 	#url = "http://api.bilibili.cn/view";
 	#bvUrl = "http://api.bilibili.cn/x/web-interface/view";
-	#extraURL = "http://interface.bilibili.com/v2/playurl";
-	#tagsURL = "https://api.bilibili.com/x/tag/archive/tags";
 	#options = {};
 	#urlRegex = /bilibili\.com\/video\/((av\d+)|((bv|BV)1[\w\d]+)(\/p\?=\d+)?)/;
 	#noUrlRegex = /(av\d{8,9})/;
@@ -51,33 +49,6 @@ module.exports = class BilibiliParser extends require("./template.js") {
 			videoID
 		}
 	};
-
-	/**
-	 * Fetches extra Bilibili video data using its cid, an app key and an access token.
-	 * @param {number|string} cid
-	 * @returns {Promise<string>}
-	 */
-	#fetchExtra = (cid) => {
-		const params = `appkey=${this.#options.appKey}&cid=${cid}&otype=json`;
-		const hash = crypto.createHash("md5").update(params + this.#options.token).digest("hex");
-		return got({
-			method: "GET",
-			url: this.#extraURL + "?" + params + "&sign=" + hash
-		}).json();
-	};
-
-	/**
-	 * Fetches tags data for a given video.
-	 * @param{string} videoID
-	 * @returns {Promise<string> | *}
-	 */
-	#fetchTags = (videoID) => got({
-		method: "GET",
-		url: `${this.#tagsURL}?aid=${videoID.replace("av", "")}`,
-		headers: {
-			"User-Agent": this.#options.userAgentDescription || "Not defined"
-		}
-	}).json();
 
 	constructor (options) {
 		super();
@@ -129,50 +100,80 @@ module.exports = class BilibiliParser extends require("./template.js") {
 				originalMessage: "出生日期格式不正确"
 			}
 		}
-		else {
-			const [extraData, tagsData] = await Promise.all([
-				(async () => await this.#fetchExtra(data.cid))(),
-				(async () => await this.#fetchTags(inputVideoID))(),
-			]);
 
-			let duration = null;
-			let size = null;
-			if (extraData && extraData.durl && extraData.durl[0]) {
-				duration = extraData.durl[0].length;
-				size = extraData.durl[0].size;
+		const hash = crypto
+			.createHash("md5")
+			.update( `appkey=${this.#options.appKey}&cid=${data.cid}&otype=json` + this.#options.token)
+			.digest("hex");
+
+		const extraDataPromise = got({
+			method: "GET",
+			url: `http://interface.bilibili.com/v2/playurl`,
+			searchParams: {
+				appkey: this.#options.appKey,
+				cid: data.cid,
+				otype: "json",
+				sign: hash
 			}
+		});
 
-			return {
-				type: "bilibili",
-				ID: videoID,
-				link: `https://www.bilibili.com/video/${inputVideoID}`,
-				name: data.title,
-				author: data.author,
-				authorID: data.mid,
-				description: data.description,
-				duration: (duration) ? (duration / 1000) : null,
-				created: (data.created) ? new Date(data.created * 1000) : null,
-				views: data.play || null,
-				comments: data.review || null,
-				likes: data.video_review || null,
-				thumbnail: data.pic || null,
-				extra: {
-					xmlCommentLink: `http://comment.bilibili.cn/${data.cid}.xml`,
-					size,
-					tags: (tagsData.data)
-						? Object.values(tagsData.data).map(tag => ({
-							name: tag.tag_name,
-							shortDescription: tag.short_content || null,
-							description: tag.content || null,
-							cover: tag.cover || null,
-							headCover: tag.head_cover || null,
-							id: tag.tag_id,
-							timesUsed: (tag.count && tag.count.use) || null
-						}))
-						: []
-				}
-			};
+		const tagsPromise = got({
+			method: "GET",
+			url: "http://api.bilibili.com/x/tag/archive/tags",
+			throwHttpErrors: false,
+			responseType: "json",
+			searchParams: {
+				aid: videoID.replace("av", "")
+			},
+			headers: {
+				"User-Agent": this.#options.userAgentDescription || "Not defined"
+			}
+		});
+
+		const [extraResponse, tagsResponse] = await Promise.allSettled([extraDataPromise, tagsPromise]);
+		let extraData = (extraResponse.status === "fulfilled") ? extraResponse.value : null;
+		let tagsData = (tagsResponse.status === "fulfilled") ? tagsResponse.value : null;
+
+		let duration = null;
+		let size = null;
+		if (extraData?.durl?.[0]) {
+			duration = extraData.durl[0].length;
+			size = extraData.durl[0].size;
 		}
+
+		let tags = [];
+		if (tagsData.data) {
+			tags = Object.values(tagsData.data).map(tag => ({
+				name: tag.tag_name,
+				shortDescription: tag.short_content ?? null,
+				description: tag.content ?? null,
+				cover: tag.cover ?? null,
+				headCover: tag.head_cover ?? null,
+				id: tag.tag_id,
+				timesUsed: tag.count?.use ?? null
+			}));
+		}
+
+		return {
+			type: "bilibili",
+			ID: videoID,
+			link: `https://www.bilibili.com/video/${inputVideoID}`,
+			name: data.title,
+			author: data.author,
+			authorID: data.mid,
+			description: data.description,
+			duration: (duration) ? (duration / 1000) : null,
+			created: (data.created) ? new Date(data.created * 1000) : null,
+			views: data.play ?? null,
+			comments: data.review ?? null,
+			likes: data.video_review ?? null,
+			thumbnail: data.pic ?? null,
+			extra: {
+				xmlCommentLink: `http://comment.bilibili.cn/${data.cid}.xml`,
+				size,
+				tags
+			}
+		};
 	}
 };
 
