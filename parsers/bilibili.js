@@ -21,6 +21,8 @@ module.exports = class BilibiliParser extends require("./template.js") {
 		if (/^bv1/i.test(videoID)) {
 			const proper = await got({
 				url: this.#bvUrl,
+				timeout: 10_000,
+				retry: 0,
 				searchParams: `bvid=${videoID}`
 			}).json();
 
@@ -37,6 +39,8 @@ module.exports = class BilibiliParser extends require("./template.js") {
 		const data = await got({
 			method: "GET",
 			url: `${this.#url}?id=${parsedVideoID}&appkey=${this.#options.appKey}`,
+			timeout: 10_000,
+			retry: 0,
 			headers: {
 				"User-Agent": this.#options.userAgentDescription || "Not defined"
 			}
