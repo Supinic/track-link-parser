@@ -19,16 +19,21 @@ module.exports = class BilibiliParser extends require("./template.js") {
 
 		// If the video starts with a "BV1" token, fetch its AV token ID first.
 		if (/^bv1/i.test(videoID)) {
-			const proper = await got({
+			const response = await got({
 				url: this.#bvUrl,
 				timeout: 10_000,
 				retry: 0,
+				responseType: "json",
 				searchParams: `bvid=${videoID}`
-			}).json();
+			});
 
-			if (proper?.data?.aid) {
+			if (response.statusCode !== 200) {
+				return null;
+			}
+
+			if (response.body.data?.aid) {
 				replaced = true;
-				videoID = "av" + proper.data.aid;
+				videoID = "av" + response.body.data.aid;
 			}
 			else {
 				return null;
@@ -36,18 +41,23 @@ module.exports = class BilibiliParser extends require("./template.js") {
 		}
 
 		const parsedVideoID = videoID.replace(/^av/, "");
-		const data = await got({
+		const response = await got({
 			method: "GET",
 			url: `${this.#url}?id=${parsedVideoID}&appkey=${this.#options.appKey}`,
+			responseType: "json",
 			timeout: 10_000,
 			retry: 0,
 			headers: {
 				"User-Agent": this.#options.userAgentDescription || "Not defined"
 			}
-		}).json();
+		});
+
+		if (response.statusCode !== 200) {
+			return null;
+		}
 
 		return {
-			data,
+			data: response.body,
 			replaced,
 			originalVideoID,
 			videoID
