@@ -82,15 +82,15 @@ module.exports = class TrackLinkParser {
 	 * @throws {Error} If no such parser exists for `type`.
 	 * @throws {Error} When using `"any"`, and no link was able to be parsed.
 	 */
-	parseLink (link, type = "any") {
+	parseLink (link, type = "auto") {
 		if (typeof link !== "string" || typeof type !== "string") {
 			throw new TypeError("Link parser: Both link and type must be string");
 		}
-		else if (type !== "any" && !this.#parsers[type]) {
+		else if (type !== "auto" && !this.#parsers[type]) {
 			throw new Error("Link parser: No parser exists for type " + type);
 		}
 
-		if (type === "any") {
+		if (type === "auto") {
 			for (const parser of Object.values(this.#parsers)) {
 				const parsedLink = parser.parseLink(link);
 				if (parsedLink) {
