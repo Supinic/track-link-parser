@@ -127,7 +127,7 @@ module.exports = class TrackLinkParser {
 	/**
 	 * Determines if a link is still available on the provided website, or checks all parsers.
 	 * @param {string} link
-	 * @param {LinkParserName|"any"} type = "any"
+	 * @param {LinkParserName|"auto"} type = "auto"
 	 * @returns {boolean}
 	 * @throws {TypeError} If `link` or `type` is not a string.
 	 * @throws {Error} If no such parser exists for `type`.
