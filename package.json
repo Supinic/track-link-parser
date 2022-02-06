@@ -15,5 +15,6 @@
   "main": "index.js",
   "name": "track-link-parser",
   "private": true,
-  "version": "1.2.0"
+  "version": "1.2.0",
+  "types": "@types/index.d.ts"
 }
