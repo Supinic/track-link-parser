@@ -21,7 +21,9 @@ module.exports = class BilibiliParser extends require("./template.js") {
 		if (/^bv1/i.test(videoID)) {
 			const response = await got({
 				url: this.#bvUrl,
-				timeout: 10_000,
+				timeout: {
+					request: 10_000
+				},
 				retry: 0,
 				responseType: "json",
 				searchParams: `bvid=${videoID}`
@@ -45,7 +47,9 @@ module.exports = class BilibiliParser extends require("./template.js") {
 			method: "GET",
 			url: `${this.#url}?id=${parsedVideoID}&appkey=${this.#options.appKey}`,
 			responseType: "json",
-			timeout: 10_000,
+			timeout: {
+				request: 10_000
+			},
 			retry: 0,
 			headers: {
 				"User-Agent": this.#options.userAgentDescription || "Not defined"
@@ -123,7 +127,9 @@ module.exports = class BilibiliParser extends require("./template.js") {
 		const extraDataPromise = got({
 			method: "GET",
 			url: `http://interface.bilibili.com/v2/playurl`,
-			timeout: 10_000,
+			timeout: {
+				request: 10_000
+			},
 			retry: 0,
 			searchParams: {
 				appkey: this.#options.appKey,
@@ -136,7 +142,9 @@ module.exports = class BilibiliParser extends require("./template.js") {
 		const tagsPromise = got({
 			method: "GET",
 			url: "http://api.bilibili.com/x/tag/archive/tags",
-			timeout: 10_000,
+			timeout: {
+				request: 10_000
+			},
 			retry: 0,
 			throwHttpErrors: false,
 			responseType: "json",
