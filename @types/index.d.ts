@@ -19,10 +19,10 @@ export declare class TrackLinkParser {
     constructor (options: Options);
 
     autoRecognize (link: Link): ParserName | null;
-    parseLink (link: Link, type: ParserName | "auto"): ReturnType<LinkParser["parseLink"]>;
-    checkValid (link: Link, type: ParserName | "auto"): ReturnType<LinkParser["checkLink"]>;
-    checkAvailable (link: Link, type: ParserName | "auto"): ReturnType<LinkParser["checkAvailable"]>;
-    fetchData (link: Link, type: ParserName | "auto"): ReturnType<LinkParser["fetchData"]>;
+    parseLink (link: Link, type?: ParserName | "auto"): ReturnType<LinkParser["parseLink"]>;
+    checkValid (link: Link, type?: ParserName | "auto"): ReturnType<LinkParser["checkLink"]>;
+    checkAvailable (link: Link, type?: ParserName | "auto"): ReturnType<LinkParser["checkAvailable"]>;
+    fetchData (link: Link, type?: ParserName | "auto"): ReturnType<LinkParser["fetchData"]>;
 
     reloadParser (parser: ParserName, options?: LinkParser.Options): boolean;
     getParser (parser: ParserName): LinkParser | undefined;
