@@ -56,7 +56,7 @@ module.exports = class YoutubeParser extends require("./template.js") {
 
 	async checkAvailable (videoID) {
 		const data = await got(this.#url(videoID)).json();
-		return Boolean(data.items.find(i => i.id === videoID));
+		return data.items.some(i => i.id === videoID);
 	}
 
 	async fetchData (videoID) {
@@ -70,7 +70,7 @@ module.exports = class YoutubeParser extends require("./template.js") {
 		return {
 			type: "youtube",
 			ID: data.id,
-			link: "https://youtu.be/" + data.id,
+			link: `https://youtu.be/${data.id}`,
 			name: data.snippet.title,
 			author: data.snippet.channelTitle,
 			authorID: data.snippet.channelId,
