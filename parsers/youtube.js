@@ -76,7 +76,9 @@ module.exports = class YoutubeParser extends require("./template.js") {
 			authorID: data.snippet.channelId,
 			description: data.snippet.description,
 			created: new Date(data.snippet.publishedAt),
-			duration: YoutubeParser.parseDuration(data.contentDetails.duration),
+			duration: (data.contentDetails.duration === "P0D")
+				? null
+				: YoutubeParser.parseDuration(data.contentDetails.duration),
 			views: Number(data.statistics.viewCount),
 			comments: Number(data.statistics.commentCount),
 			likes: Number(data.statistics.likeCount),
