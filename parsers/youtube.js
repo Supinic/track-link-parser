@@ -1,7 +1,7 @@
 const got = require("got");
 
 const thumbnailSizes = ["maxres", "high", "medium", "small", "default"];
-const durationRegex = /P(?<days>\d+)(T((?<hours>\d+)H)?((?<minutes>\d+)M)?((?<seconds>\d+)S)?)?/g;
+const durationRegex = /P((?<days>\d+)D)?(T((?<hours>\d+)H)?((?<minutes>\d+)M)?((?<seconds>\d+)S)?)?/g;
 const noUrlRegex = /[a-zA-z0-9\-_]{11}/;
 const patterns = [
 	/youtu\.be\/([a-zA-z0-9\-_]{11})/, // youtu.be/<id>
