@@ -1,7 +1,7 @@
 const got = require("got");
 
 const thumbnailSizes = ["maxres", "high", "medium", "small", "default"];
-const durationRegex = /PT((?<hours>\d+)H)?((?<minutes>\d+)M)?((?<seconds>\d+)S)?/g;
+const durationRegex = /P(?<days>\d+)(T((?<hours>\d+)H)?((?<minutes>\d+)M)?((?<seconds>\d+)S)?)?/g;
 const noUrlRegex = /[a-zA-z0-9\-_]{11}/;
 const patterns = [
 	/youtu\.be\/([a-zA-z0-9\-_]{11})/, // youtu.be/<id>
@@ -98,7 +98,7 @@ module.exports = class YoutubeParser extends require("./template.js") {
 	 */
 	static parseDuration (string) {
 		return Number(string.replace(durationRegex, (...args) => {
-			const {hours, minutes, seconds} = args[args.length - 1];
+			const { hours, minutes, seconds } = args[args.length - 1];
 			return (Number(hours) * 3600 || 0) + (Number(minutes) * 60 || 0) + (Number(seconds) || 0);
 		}));
 	}
