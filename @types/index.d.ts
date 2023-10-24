@@ -10,7 +10,7 @@ export declare type Options = ParserMetaOptions & {
     use?: string | string[];
 };
 
-export declare class TrackLinkParser {
+export default class TrackLinkParser {
     #options: ParserMetaOptions;
     #parsers: {
         [P in ParserName]?: LinkParser;
