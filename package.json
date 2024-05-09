@@ -16,5 +16,12 @@
   "name": "track-link-parser",
   "private": true,
   "version": "1.2.0",
-  "types": "@types/index.d.ts"
+  "types": "@types/index.d.ts",
+  "devDependencies": {
+    "@types/node": "^20.12.11",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+      "build": "tsc"
+  }
 }

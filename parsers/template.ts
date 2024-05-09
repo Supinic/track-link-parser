@@ -1,4 +1,8 @@
-module.exports = class TrackLinkParserTemplate {
+import { DailymotionData } from "./dailymotion";
+
+export abstract class LinkParser {
+	constructor(options: Options) { }
+
 	/**
 	 * @abstract
 	 * Returns a boolean determining if a given URL belongs to the media website a parser instance governs.
@@ -7,9 +11,7 @@ module.exports = class TrackLinkParserTemplate {
 	 * @returns {boolean}
 	 * @throws {Error} If the parser cannot determine the result - only if `noURL` is true
 	 */
-	checkLink (link, noURL) {
-		throw new Error("Method checkLink() must be implemented");
-	}
+	abstract checkLink(link: string, noURL: boolean): boolean;
 
 	/**
 	 * @abstract
@@ -18,9 +20,7 @@ module.exports = class TrackLinkParserTemplate {
 	 * @param {string} link
 	 * @returns {string|null}
 	 */
-	parseLink (link) {
-		throw new Error("Method parseLink() must be implemented");
-	}
+	abstract parseLink(link: string): string | null;
 
 	/**
 	 * @abstract
@@ -28,18 +28,14 @@ module.exports = class TrackLinkParserTemplate {
 	 * @param {string} link
 	 * @returns {Promise<boolean>}
 	 */
-	checkAvailable (link) {
-		throw new Error("Method checkAvailable() must be implemented");
-	}
+	abstract checkAvailable(link: string): Promise<boolean>;
 
 	/**
 	 * @abstract
 	 * For a given media file ID, fetches a (mostly) standardized response that describes the media.
 	 * @returns {Promise<LinkParserFetchResponse|null>}
 	 */
-	fetchData (mediaID) {
-		throw new Error("Method fetchData() must be implemented");
-	}
+	abstract fetchData(mediaID: string): Promise<Response | null>;
 };
 
 /**
@@ -64,3 +60,26 @@ module.exports = class TrackLinkParserTemplate {
  * @property {BilibiliParserData|DailymotionData|NicovideoParserData|SoundcloudParserData|VimeoParserData|YoutubeParserData} extra
  * Website-specific extra data, depends on the parser instance used.
  */
+
+
+export type Name = "bilibili" | "dailymotion" | "nicovideo" | "soundcloud" | "vimeo" | "vk" | "youtube";
+export type Response = {
+	type: Name;
+	ID: string;
+	link: string;
+	name: string;
+	author: string | null;
+	authorID: string | number | null;
+	description: string | null;
+	duration: number | null;
+	created: Date | null;
+	views: number | null;
+	comments: number | null;
+	likes: number | null;
+	thumbnail: string | null;
+	// extra: BilibiliData | DailymotionData | NicovideoData | SoundcloudData | VimeoData | VKData | YoutubeData
+	extra: DailymotionData;
+};
+
+export type Options = {};
+// type Options = BilibiliOptions | SoundcloudOptions | YoutubeOptions | {};

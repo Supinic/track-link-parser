@@ -1,4 +1,5 @@
-const got = require("got");
+import got from "got";
+import { LinkParser, Options, Response } from "./template.js";
 
 const urlRegex = /(dailymotion\.com\/video\/|dai\.ly\/)([kx][a-z0-9]{5,6})/;
 const noUrlRegex = /^[kx][a-z0-9]{5,6}$/;
@@ -20,8 +21,8 @@ const dataFields = [
 	"url"
 ];
 
-module.exports = class DailymotionParser extends require("./template.js") {
-	checkLink (link, noURL) {
+module.exports = class DailymotionParser extends LinkParser {
+	checkLink(link: string, noURL: boolean): boolean {
 		if (noURL) {
 			return noUrlRegex.test(link);
 		}
@@ -30,11 +31,11 @@ module.exports = class DailymotionParser extends require("./template.js") {
 		}
 	}
 
-	parseLink (url) {
+	parseLink(url: string): string | null {
 		return url.match(urlRegex)?.[2] ?? null;
 	}
 
-	async checkAvailable (videoID) {
+	async checkAvailable(videoID: string): Promise<boolean> {
 		const { statusCode } = await got({
 			url: `https://api.dailymotion.com/video/${videoID}`,
 			throwHttpErrors: false
@@ -43,11 +44,11 @@ module.exports = class DailymotionParser extends require("./template.js") {
 		return (statusCode === 200);
 	}
 
-	async fetchData (videoID) {
-		let data;
-		let commentsData;
+	async fetchData(videoID: string): Promise<Response | null> {
+		let videoData;
+		let commentsData: any;
 		try {
-			[data, commentsData] = await Promise.all([
+			[videoData, commentsData] = await Promise.all([
 				got({
 					url: `https://api.dailymotion.com/video/${videoID}`,
 					searchParams: {
@@ -56,10 +57,12 @@ module.exports = class DailymotionParser extends require("./template.js") {
 				}).json(),
 				got(`https://api.dailymotion.com/video/${videoID}/comments`).json()
 			]);
+
 		}
 		catch {
 			return null;
 		}
+		const data = videoData as DailymotionResponse;
 
 		return {
 			type: "dailymotion",
@@ -83,8 +86,22 @@ module.exports = class DailymotionParser extends require("./template.js") {
 	}
 };
 
-/**
- * @typedef {Object} DailymotionData
- * @property {boolean} explicit
- * @property {string[]} tags
- */
+type DailymotionResponse = {
+	id: string;
+	title: string;
+	"owner.screenname": string | null;
+	owner: string | number | null;
+	description: string | null;
+	created_time: number | null;
+	duration: number | null;
+	views_total: number | null;
+	likes_total: number | null;
+	thumbnail_url: string | null;
+	explicit: boolean;
+	tags: string[];
+};
+
+export type DailymotionData = {
+	explicit: boolean;
+	tags: string[];
+}

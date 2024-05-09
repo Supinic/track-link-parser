@@ -1,21 +1,29 @@
-const parserList = ["youtube", "vimeo", "nicovideo", "bilibili", "soundcloud", "dailymotion" /*, "vk" */];
-const parserConstructors = {};
+import * as LinkParser from "./parsers/template.js";
+
+// const parserList = ["youtube", "vimeo", "nicovideo", "bilibili", "soundcloud", "dailymotion" /*, "vk" */];
+const parserList = ["dailymotion"];
+const parserConstructors: Map<string, { new(options: LinkParser.Options): LinkParser.LinkParser; }> = new Map();
+
+export type ParserName = LinkParser.Name;
+export type Link = string;
+
+type ParserMetaOptions = {
+	[P in ParserName]?: LinkParser.Options; // @todo possible to map specific ParserName to its Parser.Options?
+};
+export type Options = ParserMetaOptions & {
+	use?: string | string[] | LinkParser.Options;
+};
 
 /**
  * Wrapper that holds several link parsers, where each of them works with a different media-file sharing website in order
  * to fetch, process and parse media data into a standardized format.
- * @type {TrackLinkParser}
  */
-module.exports = class TrackLinkParser {
-	#options = {};
+export class TrackLinkParser {
+	#options: Map<string, string | string[] | LinkParser.Options> = new Map();
 
-	/** @type {Object<"string", TrackLinkParserTemplate>} */
-	#parsers = {};
+	#parsers: Map<string, LinkParser.LinkParser> = new Map();
 
-	/**
-	 * @param {Object} options
-	 */
-	constructor (options = {}) {
+	constructor(options: Options = {}) {
 		let usedParsers = parserList;
 		if (options.use) {
 			if (typeof options.use === "string") {
@@ -30,7 +38,7 @@ module.exports = class TrackLinkParser {
 		}
 
 		for (const file of usedParsers) {
-			parserConstructors[file] = require("./parsers/" + file + ".js");
+			parserConstructors.set(file, require("./parsers/" + file + ".js"));
 		}
 
 		for (const [target, params] of Object.entries(options)) {
@@ -41,11 +49,13 @@ module.exports = class TrackLinkParser {
 				throw new Error("Link parser: unrecognized options for key " + target);
 			}
 
-			this.#options[target] = params;
+			this.#options.set(target, params);
 		}
 
 		for (const parser of usedParsers) {
-			this.#parsers[parser] = new parserConstructors[parser](this.#options[parser] || {});
+			let constructor = parserConstructors.get(parser)!;
+			const parserInstance = new constructor(this.#options.get(parser) || {})
+			this.#parsers.set(parser, parserInstance);
 		}
 	}
 
@@ -56,7 +66,7 @@ module.exports = class TrackLinkParser {
 	 * @throws {TypeError} If `link` is not a string.
 	 * @throws {Error} If `link` is an empty string.
 	 */
-	autoRecognize (link) {
+	autoRecognize(link: Link): Link | null {
 		if (typeof link !== "string") {
 			throw new TypeError("Link parser: link must be a string");
 		}
@@ -64,7 +74,7 @@ module.exports = class TrackLinkParser {
 			throw new Error("Link parser: link must be a non-empty string");
 		}
 
-		for (const [type, parser] of Object.entries(this.#parsers)) {
+		for (const [type, parser] of this.#parsers) {
 			if (parser.parseLink(link)) {
 				return type;
 			}
@@ -76,17 +86,17 @@ module.exports = class TrackLinkParser {
 	/**
 	 * Attempts to fetch the media file ID from a URL, either through a provided parser type, or automatically.
 	 * @param {string} link
-	 * @param {LinkParserName|"any"} type = "any" Specific parser name. If `"any"`, every parser will be checked,
+	 * @param {LinkParserName|"auto"} type = "auto" Specific parser name. If `"auto"`, every parser will be checked,
 	 * and the first proper value will be returned.
 	 * @throws {TypeError} If `link` or `type` is not a string.
 	 * @throws {Error} If no such parser exists for `type`.
 	 * @throws {Error} When using `"any"`, and no link was able to be parsed.
 	 */
-	parseLink (link, type = "auto") {
+	parseLink(link: Link, type: ParserName | "auto" = "auto"): string | null {
 		if (typeof link !== "string" || typeof type !== "string") {
 			throw new TypeError("Link parser: Both link and type must be string");
 		}
-		else if (type !== "auto" && !this.#parsers[type]) {
+		else if (type !== "auto" && !this.#parsers.get(type)) {
 			throw new Error("Link parser: No parser exists for type " + type);
 		}
 
@@ -101,7 +111,7 @@ module.exports = class TrackLinkParser {
 			throw new Error("Link parser: Cannot parse link " + link + " - unable to parse");
 		}
 		else {
-			return this.#parsers[type].parseLink(link);
+			return this.#parsers.get(type)?.parseLink(link) ?? null;
 		}
 	}
 
@@ -113,15 +123,15 @@ module.exports = class TrackLinkParser {
 	 * @throws {TypeError} If `link` or `type` is not a string.
 	 * @throws {Error} If no such parser exists for `type`.
 	 */
-	checkValid (link, type) {
+	checkValid(link: Link, type: ParserName | "auto" = "auto") {
 		if (typeof link !== "string" || typeof type !== "string") {
 			throw new TypeError("Link parser: Both link and type must be string");
 		}
-		else if (!this.#parsers[type]) {
+		else if (!this.#parsers.get(type)) {
 			throw new Error("Link parser: No parser exists for type " + type);
 		}
 
-		return this.#parsers[type].checkLink(link);
+		return this.#parsers.get(type)?.checkLink(link, false); // noURL wasn't passed before. TODO: ask supi about it
 	}
 
 	/**
@@ -132,11 +142,11 @@ module.exports = class TrackLinkParser {
 	 * @throws {TypeError} If `link` or `type` is not a string.
 	 * @throws {Error} If no such parser exists for `type`.
 	 */
-	async checkAvailable (link, type = "auto") {
+	async checkAvailable(link: Link, type: ParserName | "auto" = "auto") {
 		if (typeof link !== "string" || typeof type !== "string") {
 			throw new TypeError("Link parser: Both link and type must be string");
 		}
-		else if (type !== "auto" && !this.#parsers[type]) {
+		else if (type !== "auto" && !this.#parsers.get(type)) {
 			throw new Error("Link parser: No parser exists for type " + type);
 		}
 
@@ -151,9 +161,9 @@ module.exports = class TrackLinkParser {
 			throw new Error("Link parser: Cannot check availability of link " + link + " - unable to parse");
 		}
 		else {
-			const parsedLink = this.#parsers[type].parseLink(link);
+			const parsedLink = this.#parsers.get(type)!.parseLink(link);
 			if (parsedLink) {
-				return await this.#parsers[type].checkAvailable(parsedLink);
+				return await this.#parsers.get(type)!.checkAvailable(parsedLink);
 			}
 			else {
 				throw new Error("Link parser: Cannot check availability of link " + link + " - unable to parse for type " + type);
@@ -170,11 +180,11 @@ module.exports = class TrackLinkParser {
 	 * @throws {Error} If invalid parser is provided.
 	 * @throws {Error} If parser cannot parse the link provided.
 	 */
-	async fetchData (link, type = "auto") {
+	async fetchData(link: Link, type: ParserName | "auto" = "auto") {
 		if (typeof link !== "string" || typeof type !== "string") {
 			throw new TypeError("Link parser: Both link and type must be string");
 		}
-		else if (type !== "auto" && !this.#parsers[type]) {
+		else if (type !== "auto" && !this.#parsers.get(type)) {
 			throw new Error("Link parser: No parser exists for type " + type);
 		}
 
@@ -189,7 +199,7 @@ module.exports = class TrackLinkParser {
 			throw new Error("Link parser: Cannot fetch data for link " + link + " - unable to parse");
 		}
 		else {
-			return await this.#parsers[type].fetchData(link);
+			return await this.#parsers.get(type)!.fetchData(link);
 		}
 	}
 
@@ -200,15 +210,15 @@ module.exports = class TrackLinkParser {
 	 * @returns {boolean} Determines the success of the reload operation
 	 * @throws {Error} If invalid parser name is provided.
 	 */
-	reloadParser (parser, options = {}) {
-		const constructor = parserConstructors[parser];
+	reloadParser(parser: ParserName, options = {}) {
+		const constructor = parserConstructors.get(parser);
 		if (!constructor) {
 			throw new Error("Invalid constructor name provided");
 		}
 
 		try {
-			this.#parsers[parser] = new parserConstructors[parser](options);
-			this.#options[parser] = options;
+			this.#parsers.set(parser, new constructor(options));
+			this.#options.set(parser, options);
 			return true;
 		}
 		catch (e) {
@@ -222,7 +232,7 @@ module.exports = class TrackLinkParser {
 	 * @param {LinkParserName} parser
 	 * @returns {TrackLinkParserTemplate} Parser instance - depending on the website provided.
 	 */
-	getParser (parser) {
-		return this.#parsers[parser];
+	getParser(parser: ParserName) {
+		return this.#parsers.get(parser);
 	}
 };
