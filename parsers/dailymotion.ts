@@ -1,5 +1,9 @@
 import got from "got";
-import { LinkParser, Options, Response } from "./template.js";
+import {
+	LinkParser,
+	Response,
+	ExtraData
+} from "./template.js";
 
 const urlRegex = /(dailymotion\.com\/video\/|dai\.ly\/)([kx][a-z0-9]{5,6})/;
 const noUrlRegex = /^[kx][a-z0-9]{5,6}$/;
@@ -21,8 +25,31 @@ const dataFields = [
 	"url"
 ];
 
-module.exports = class DailymotionParser extends LinkParser {
-	checkLink(link: string, noURL: boolean): boolean {
+export interface DailymotionData extends ExtraData {
+	explicit: boolean;
+	tags: string[];
+}
+export interface DailymotionResponse extends Response {
+	extra: DailymotionData;
+}
+
+type LocalDailymotionResponse = {
+	id: string;
+	title: string;
+	"owner.screenname": string | null;
+	owner: string | number | null;
+	description: string | null;
+	created_time: number | null;
+	duration: number | null;
+	views_total: number | null;
+	likes_total: number | null;
+	thumbnail_url: string | null;
+	explicit: boolean;
+	tags: string[];
+};
+
+export class DailymotionParser extends LinkParser {
+	checkLink (link: string, noURL: boolean): boolean {
 		if (noURL) {
 			return noUrlRegex.test(link);
 		}
@@ -31,11 +58,11 @@ module.exports = class DailymotionParser extends LinkParser {
 		}
 	}
 
-	parseLink(url: string): string | null {
+	parseLink (url: string): string | null {
 		return url.match(urlRegex)?.[2] ?? null;
 	}
 
-	async checkAvailable(videoID: string): Promise<boolean> {
+	async checkAvailable (videoID: string): Promise<boolean> {
 		const { statusCode } = await got({
 			url: `https://api.dailymotion.com/video/${videoID}`,
 			throwHttpErrors: false
@@ -44,7 +71,7 @@ module.exports = class DailymotionParser extends LinkParser {
 		return (statusCode === 200);
 	}
 
-	async fetchData(videoID: string): Promise<Response | null> {
+	async fetchData (videoID: string): Promise<DailymotionResponse | null> {
 		let videoData;
 		let commentsData: any;
 		try {
@@ -62,8 +89,8 @@ module.exports = class DailymotionParser extends LinkParser {
 		catch {
 			return null;
 		}
-		const data = videoData as DailymotionResponse;
 
+		const data = videoData as LocalDailymotionResponse;
 		return {
 			type: "dailymotion",
 			ID: data.id,
@@ -84,24 +111,4 @@ module.exports = class DailymotionParser extends LinkParser {
 			}
 		};
 	}
-};
-
-type DailymotionResponse = {
-	id: string;
-	title: string;
-	"owner.screenname": string | null;
-	owner: string | number | null;
-	description: string | null;
-	created_time: number | null;
-	duration: number | null;
-	views_total: number | null;
-	likes_total: number | null;
-	thumbnail_url: string | null;
-	explicit: boolean;
-	tags: string[];
-};
-
-export type DailymotionData = {
-	explicit: boolean;
-	tags: string[];
 }
