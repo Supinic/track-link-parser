@@ -19,7 +19,7 @@ type ParserMetaOptions = {
  * Wrapper that holds several link parsers, where each of them works with a different media-file sharing website in order
  * to fetch, process and parse media data into a standardized format.
  */
-export class TrackLinkParser {
+export class ParserManager {
 	#parsers: Map<ParserName, LinkParser> = new Map();
 
 	constructor (options: ParserMetaOptions) {
