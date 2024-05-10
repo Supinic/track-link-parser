@@ -5,7 +5,7 @@
   },
   "deprecated": false,
   "dependencies": {
-    "fast-xml-parser": "^3.19.0",
+    "fast-xml-parser": "^4.3.0",
     "got": "^11.8.0"
   },
   "description": "Parses many various media sharing sites' links into a compact and standardized object data.",

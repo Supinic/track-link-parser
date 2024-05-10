@@ -35,7 +35,6 @@ export interface Response {
 
 export abstract class LinkParser {
 	static readonly name: string;
-	protected options: GenericParserOptions = {};
 
 	/**
 	 * Returns a boolean determining if a given URL belongs to the media website a parser instance governs.
@@ -60,11 +59,4 @@ export abstract class LinkParser {
 	 * For a given media file ID, fetches a (mostly) standardized response that describes the media.
 	 */
 	abstract fetchData (mediaID: string): Promise<Response | null>;
-
-	/**
-	 * Adjusts the options of a parser instance.
-	 */
-	public setOptions (options: GenericParserOptions) {
-		this.options = options;
-	}
 }
