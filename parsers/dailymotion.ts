@@ -49,9 +49,9 @@ type LocalDailymotionResponse = {
 };
 
 export class DailymotionParser extends LinkParser {
-	static readonly name = "dailymotion";
+	readonly name = "dailymotion";
 
-	checkLink (link: string, noURL: boolean): boolean {
+	checkLink(link: string, noURL: boolean): boolean {
 		if (noURL) {
 			return noUrlRegex.test(link);
 		}
@@ -60,11 +60,11 @@ export class DailymotionParser extends LinkParser {
 		}
 	}
 
-	parseLink (url: string): string | null {
+	parseLink(url: string): string | null {
 		return url.match(urlRegex)?.[2] ?? null;
 	}
 
-	async checkAvailable (videoID: string): Promise<boolean> {
+	async checkAvailable(videoID: string): Promise<boolean> {
 		const { statusCode } = await got({
 			url: `https://api.dailymotion.com/video/${videoID}`,
 			throwHttpErrors: false
@@ -73,7 +73,7 @@ export class DailymotionParser extends LinkParser {
 		return (statusCode === 200);
 	}
 
-	async fetchData (videoID: string): Promise<DailymotionResponse | null> {
+	async fetchData(videoID: string): Promise<DailymotionResponse | null> {
 		let videoData;
 		let commentsData: any;
 		try {
@@ -94,7 +94,6 @@ export class DailymotionParser extends LinkParser {
 
 		const data = videoData as LocalDailymotionResponse;
 		return {
-			type: "dailymotion",
 			ID: data.id,
 			link: `https://dailymotion.com/${data.id}`,
 			name: data.title,
