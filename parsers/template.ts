@@ -34,6 +34,7 @@ export interface Response {
 }
 
 export abstract class LinkParser {
+	static readonly name: string;
 	protected options: GenericParserOptions = {};
 
 	/**

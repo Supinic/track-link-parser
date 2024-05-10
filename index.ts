@@ -5,6 +5,8 @@ import {
 	Response
 } from "./parsers/template.js";
 
+import { DailymotionParser } from "./parsers/dailymotion";
+
 const DEFAULT_PARSER_LIST: ParserName[] = ["dailymotion"]; // @todo implement other parser in Typescript
 
 export type Link = string;
@@ -25,8 +27,15 @@ export class ParserManager {
 	constructor (options: ParserMetaOptions) {
 		const list = options.list ?? DEFAULT_PARSER_LIST;
 		for (const file of list) {
+			let ParserConstructor;
+			if (file === "dailymotion") {
+				ParserConstructor = DailymotionParser;
+			}
+			else {
+				ParserConstructor = require("./parsers/" + file + ".js");
+			}
+
 			// @todo create a static method in template to create parsers based on their name?
-			const ParserConstructor = require("./parsers/" + file + ".js");
 			const parserOptions = options.parsers[file] ?? {};
 
 			const instance = new ParserConstructor(parserOptions);

@@ -49,6 +49,8 @@ type LocalDailymotionResponse = {
 };
 
 export class DailymotionParser extends LinkParser {
+	static readonly name = "dailymotion";
+
 	checkLink (link: string, noURL: boolean): boolean {
 		if (noURL) {
 			return noUrlRegex.test(link);
