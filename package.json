@@ -26,6 +26,8 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "yarn eslint .",
+    "fix": "yarn eslint --fix ."
   }
 }
