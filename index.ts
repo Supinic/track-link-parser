@@ -26,7 +26,7 @@ type ParserMetaOptions = {
 export class ParserManager {
 	#parsers: Map<ParserName, LinkParser> = new Map();
 
-	constructor(options: ParserMetaOptions) {
+	constructor (options: ParserMetaOptions) {
 		// For some reason accessing `list` throws even with the fallback?
 		// const list = options.list ?? DEFAULT_PARSER_LIST;
 		const list = DEFAULT_PARSER_LIST;
@@ -39,7 +39,7 @@ export class ParserManager {
 	/**
 	 * Attempts to detect the website of a media link.
 	 */
-	autoRecognize(link: Link): ParserName | null {
+	autoRecognize (link: Link): ParserName | null {
 		for (const [type, parser] of this.#parsers.entries()) {
 			if (parser.parseLink(link)) {
 				return type;
@@ -55,7 +55,7 @@ export class ParserManager {
 	 * @param type Specific parser name. If `"auto"`, every parser will be checked.
 	 * and the first proper value will be returned.
 	 */
-	parseLink(link: Link, type: ParserName | "auto" = "auto"): string | null {
+	parseLink (link: Link, type: ParserName | "auto" = "auto"): string | null {
 		if (type === "auto") {
 			for (const parser of Object.values(this.#parsers)) {
 				const parsedLink = parser.parseLink(link);
@@ -77,7 +77,7 @@ export class ParserManager {
 	 * @param link media URL
 	 * @param type Specific parser name.
 	 */
-	checkValid(link: Link, type: ParserName): boolean {
+	checkValid (link: Link, type: ParserName): boolean {
 		const parser = this.#parsers.get(type);
 		return parser!.checkLink(link, false);
 	}
@@ -87,7 +87,7 @@ export class ParserManager {
 	 * @param link media URL
 	 * @param type Specific parser name. If `"auto"`, every parser will be checked.
 	 */
-	async checkAvailable(link: Link, type: ParserName | "auto" = "auto"): Promise<boolean> {
+	async checkAvailable (link: Link, type: ParserName | "auto" = "auto"): Promise<boolean> {
 		if (type === "auto") {
 			for (const parser of Object.values(this.#parsers)) {
 				const parsedLink = parser.parseLink(link);
@@ -115,7 +115,7 @@ export class ParserManager {
 	 * @param link media URL
 	 * @param type Specific parser name. If `"auto"`, every parser will be checked.
 	 */
-	async fetchData(link: Link, type: ParserName | "auto" = "auto"): Promise<Response | null> {
+	async fetchData (link: Link, type: ParserName | "auto" = "auto"): Promise<Response | null> {
 		if (type === "auto") {
 			for (const parser of Object.values(this.#parsers)) {
 				const parsedLink = parser.parseLink(link);
@@ -143,7 +143,7 @@ export class ParserManager {
 	/**
 	 * Fetches a specific parser instance.
 	 */
-	getParser(parserName: ParserName): LinkParser {
+	getParser (parserName: ParserName): LinkParser {
 		return this.#parsers.get(parserName) as LinkParser;
 	}
 }

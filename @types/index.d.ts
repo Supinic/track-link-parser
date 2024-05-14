@@ -11,19 +11,19 @@ export declare type Options = ParserMetaOptions & {
 };
 
 export default class TrackLinkParser {
-    #options: ParserMetaOptions;
-    #parsers: {
+	#options: ParserMetaOptions;
+	#parsers: {
         [P in ParserName]?: LinkParser;
     };
 
-    constructor (options: Options);
+	constructor (options: Options);
 
-    autoRecognize (link: Link): ParserName | null;
-    parseLink (link: Link, type?: ParserName | "auto"): ReturnType<LinkParser["parseLink"]>;
-    checkValid (link: Link, type?: ParserName | "auto"): ReturnType<LinkParser["checkLink"]>;
-    checkAvailable (link: Link, type?: ParserName | "auto"): ReturnType<LinkParser["checkAvailable"]>;
-    fetchData (link: Link, type?: ParserName | "auto"): ReturnType<LinkParser["fetchData"]>;
+	autoRecognize (link: Link): ParserName | null;
+	parseLink (link: Link, type?: ParserName | "auto"): ReturnType<LinkParser["parseLink"]>;
+	checkValid (link: Link, type?: ParserName | "auto"): ReturnType<LinkParser["checkLink"]>;
+	checkAvailable (link: Link, type?: ParserName | "auto"): ReturnType<LinkParser["checkAvailable"]>;
+	fetchData (link: Link, type?: ParserName | "auto"): ReturnType<LinkParser["fetchData"]>;
 
-    reloadParser (parser: ParserName, options?: LinkParser.Options): boolean;
-    getParser (parser: ParserName): LinkParser | undefined;
+	reloadParser (parser: ParserName, options?: LinkParser.Options): boolean;
+	getParser (parser: ParserName): LinkParser | undefined;
 }

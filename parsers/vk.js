@@ -20,7 +20,7 @@ module.exports = class VKontakteParser extends require("./template.js") {
 		encoding: null,
 		headers: {
 			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36 OPR/62.0.3331.72",
-			Accept: "text/html;charset=UTF-8",
+			Accept: "text/html;charset=UTF-8"
 			// "Accept-Language": "ru-RU"
 		}
 	}).text();

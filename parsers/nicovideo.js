@@ -52,7 +52,7 @@ module.exports = class NicovideoParser extends require("./template.js") {
 		return {
 			type: "nicovideo",
 			ID: data.video_id,
-			link: "https://www.nicovideo.jp/watch/" + data.video_id,
+			link: `https://www.nicovideo.jp/watch/${data.video_id}`,
 			name: data.title,
 			author: (data.user_nickname === null)
 				? null

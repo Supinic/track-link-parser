@@ -35,7 +35,7 @@ module.exports = class BilibiliParser extends require("./template.js") {
 
 			if (response.body.data?.aid) {
 				replaced = true;
-				videoID = "av" + response.body.data.aid;
+				videoID = `av${response.body.data.aid}`;
 			}
 			else {
 				return null;
@@ -65,7 +65,7 @@ module.exports = class BilibiliParser extends require("./template.js") {
 			replaced,
 			originalVideoID,
 			videoID
-		}
+		};
 	};
 
 	constructor (options) {
@@ -116,12 +116,12 @@ module.exports = class BilibiliParser extends require("./template.js") {
 			return {
 				message: "Temporarily rate limited",
 				originalMessage: "出生日期格式不正确"
-			}
+			};
 		}
 
 		const hash = crypto
 			.createHash("md5")
-			.update( `appkey=${this.#options.appKey}&cid=${data.cid}&otype=json` + this.#options.token)
+			.update(`appkey=${this.#options.appKey}&cid=${data.cid}&otype=json${this.#options.token}`)
 			.digest("hex");
 
 		const extraDataPromise = got({
@@ -157,8 +157,8 @@ module.exports = class BilibiliParser extends require("./template.js") {
 		});
 
 		const [extraResponse, tagsResponse] = await Promise.allSettled([extraDataPromise, tagsPromise]);
-		let extraData = (extraResponse.status === "fulfilled") ? extraResponse.value : null;
-		let tagsData = (tagsResponse.status === "fulfilled") ? tagsResponse.value : null;
+		const extraData = (extraResponse.status === "fulfilled") ? extraResponse.value : null;
+		const tagsData = (tagsResponse.status === "fulfilled") ? tagsResponse.value : null;
 
 		let duration = null;
 		let size = null;
