@@ -14,7 +14,9 @@ module.exports = {
 		"@typescript-eslint"
 	],
 	rules: {
-		"@typescript-eslint/no-unused-vars": "off",
+		"@typescript-eslint/no-unused-vars": "warn",
+		"no-unused-vars": "off",
+		"@typescript-eslint/space-before-function-paren": ["warn", "always"],
 		"@typescript-eslint/no-var-requires": "off",
 
 		"array-bracket-newline": ["warn", "consistent"],
@@ -124,7 +126,6 @@ module.exports = {
 		],
 		"no-underscore-dangle": "off",
 		"no-unneeded-ternary": "warn",
-		"no-unused-vars": "warn",
 		"no-useless-computed-key": "warn",
 		"no-useless-constructor": "warn",
 		"no-useless-escape": "warn",

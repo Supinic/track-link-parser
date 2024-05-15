@@ -42,21 +42,21 @@ export abstract class LinkParser {
 	 * @param noURL If true, the input provided is considered just the media ID - and not a full URL.
 	 * @throws {Error} If the parser cannot determine the result - only if `noURL` is true
 	 */
-	abstract checkLink(link: string, noURL: boolean): boolean;
+	abstract checkLink (link: string, noURL: boolean): boolean;
 
 	/**
 	 * For a given URL, attempts to parse out the media ID.
 	 * Returns `null` if no ID was found.
 	 */
-	abstract parseLink(link: string): string | null;
+	abstract parseLink (link: string): string | null;
 
 	/**
 	 * Returns a boolean determining if a given media ID is still available on the website.
 	 */
-	abstract checkAvailable(link: string): Promise<boolean>;
+	abstract checkAvailable (link: string): Promise<boolean>;
 
 	/**
 	 * For a given media file ID, fetches a (mostly) standardized response that describes the media.
 	 */
-	abstract fetchData(mediaID: string): Promise<Response | null>;
+	abstract fetchData (mediaID: string): Promise<Response | null>;
 }
