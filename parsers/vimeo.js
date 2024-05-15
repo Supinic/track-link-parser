@@ -48,7 +48,7 @@ module.exports = class VimeoParser extends require("./template.js") {
 				link: data.url,
 				name: data.title,
 				author: data.user_name,
-				authorID: "user" + data.user_id,
+				authorID: `user${data.user_id}`,
 				description: data.description,
 				duration: data.duration,
 				created: new Date(data.upload_date),

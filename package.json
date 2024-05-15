@@ -5,7 +5,7 @@
   },
   "deprecated": false,
   "dependencies": {
-    "fast-xml-parser": "^3.19.0",
+    "fast-xml-parser": "^4.3.0",
     "got": "^11.8.0"
   },
   "description": "Parses many various media sharing sites' links into a compact and standardized object data.",
@@ -16,5 +16,18 @@
   "name": "track-link-parser",
   "private": true,
   "version": "1.2.0",
-  "types": "@types/index.d.ts"
+  "types": "@types/index.d.ts",
+  "devDependencies": {
+    "@types/node": "^20.12.11",
+    "@typescript-eslint/eslint-plugin": "^7.9.0",
+    "@typescript-eslint/parser": "^7.9.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-unicorn": "^53.0.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "yarn eslint .",
+    "fix": "yarn eslint --fix ."
+  }
 }
