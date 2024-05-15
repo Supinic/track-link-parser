@@ -6,6 +6,7 @@ import {
 } from "./parsers/template.js";
 
 import { DailymotionParser } from "./parsers/dailymotion";
+import { SoundcloudParser } from "./parsers/soundcloud";
 
 type LinkParserConstructor = { new(): LinkParser }; // Doesn't seem like a required constructor can be part of the abstract class?
 const DEFAULT_PARSER_LIST: LinkParserConstructor[] = [DailymotionParser]; // @todo implement other parser in Typescript
