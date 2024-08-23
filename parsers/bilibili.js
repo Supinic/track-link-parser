@@ -2,8 +2,6 @@ const got = require("got");
 const crypto = require("crypto");
 
 module.exports = class BilibiliParser extends require("./template.js") {
-	#url = "http://api.bilibili.cn/view";
-	#bvUrl = "http://api.bilibili.cn/x/web-interface/view";
 	#options = {};
 	#urlRegex = /bilibili\.com\/video\/((av\d+)|((bv|BV)1[\w\d]+)(\/p\?=\d+)?)/;
 	#noUrlRegex = /(av\d{8,9})/;
@@ -14,46 +12,19 @@ module.exports = class BilibiliParser extends require("./template.js") {
 	 * @returns {Promise<Object|null>}
 	 */
 	#fetch = async (videoID) => {
-		const originalVideoID = videoID;
-		let replaced = false;
-
 		// If the video starts with a "BV1" token, fetch its AV token ID first.
-		if (/^bv1/i.test(videoID)) {
-			const response = await got({
-				url: this.#bvUrl,
-				timeout: {
-					request: 10_000
-				},
-				retry: 0,
-				responseType: "json",
-				searchParams: `bvid=${videoID}`
-			});
-
-			if (response.statusCode !== 200) {
-				return null;
-			}
-
-			if (response.body.data?.aid) {
-				replaced = true;
-				videoID = "av" + response.body.data.aid;
-			}
-			else {
-				return null;
-			}
+		if (!/^bv1/i.test(videoID)) {
+			return null; // Unsupported video prefix
 		}
 
-		const parsedVideoID = videoID.replace(/^av/, "");
 		const response = await got({
-			method: "GET",
-			url: `${this.#url}?id=${parsedVideoID}&appkey=${this.#options.appKey}`,
-			responseType: "json",
+			url: "https://api.bilibili.com/x/web-interface/wbi/view",
 			timeout: {
 				request: 10_000
 			},
 			retry: 0,
-			headers: {
-				"User-Agent": this.#options.userAgentDescription || "Not defined"
-			}
+			responseType: "json",
+			searchParams: `bvid=${videoID}`
 		});
 
 		if (response.statusCode !== 200) {
@@ -62,10 +33,7 @@ module.exports = class BilibiliParser extends require("./template.js") {
 
 		return {
 			data: response.body,
-			replaced,
-			originalVideoID,
-			videoID
-		}
+		};
 	};
 
 	constructor (options) {
@@ -103,12 +71,8 @@ module.exports = class BilibiliParser extends require("./template.js") {
 		return (data.code !== -400);
 	}
 
-	async fetchData (inputVideoID) {
-		const { data, replaced, videoID } = await this.#fetch(inputVideoID);
-		if (replaced) {
-			inputVideoID = videoID;
-		}
-
+	async fetchData (videoID) {
+		const { data } = await this.#fetch(videoID);
 		if (!data || data.code === -400 || data.code === -404) {
 			return null;
 		}
@@ -121,7 +85,7 @@ module.exports = class BilibiliParser extends require("./template.js") {
 
 		const hash = crypto
 			.createHash("md5")
-			.update( `appkey=${this.#options.appKey}&cid=${data.cid}&otype=json` + this.#options.token)
+			.update(`appkey=${this.#options.appKey}&cid=${data.cid}&otype=json` + this.#options.token)
 			.digest("hex");
 
 		const extraDataPromise = got({
@@ -183,7 +147,7 @@ module.exports = class BilibiliParser extends require("./template.js") {
 		return {
 			type: "bilibili",
 			ID: videoID,
-			link: `https://www.bilibili.com/video/${inputVideoID}`,
+			link: `https://www.bilibili.com/video/${videoID}`,
 			name: data.title,
 			author: data.author,
 			authorID: data.mid,
