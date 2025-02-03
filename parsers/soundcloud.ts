@@ -48,7 +48,7 @@ type SoundcloudUser = {
 	verified: boolean;
 	visuals: {
 		enabled: boolean;
-		tracking: unknown | null;
+		tracking: unknown;
 		urn: string;
 		visuals: {
 			entry_time: number;

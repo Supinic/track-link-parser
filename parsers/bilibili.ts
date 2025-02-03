@@ -72,7 +72,7 @@ type BilibiliApiResponse = {
 		};
 	}[];
 	pic: string;
-	premiere: unknown | null;
+	premiere: unknown;
 	pubdate: number;
 	rights: {
 		arc_pay: PseudoBoolean;
@@ -147,7 +147,7 @@ const bbFetch = async (videoId: string): Promise<Response> => {
 	}
 
 	return await fetch(url);
-}
+};
 
 export default class BilibiliParser extends Template {
 	parseLink (link: string) {

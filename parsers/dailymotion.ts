@@ -51,9 +51,9 @@ const dataFields = [
 	"url"
 ].join(",");
 
-const simpleDailymotionFetch = async (videoId: string) => {
-	return await fetch(`https://api.dailymotion.com/video/${videoId}`);
-};
+const simpleDailymotionFetch = async (videoId: string) => (
+	await fetch(`https://api.dailymotion.com/video/${videoId}`)
+);
 const dailymotionFetch = async (videoId: string) => {
 	const commentsUrl = new URL(`https://api.dailymotion.com/video/${videoId}/comments`);
 	const apiUrl = new URL(`https://api.dailymotion.com/video/${videoId}`);
@@ -66,10 +66,11 @@ const dailymotionFetch = async (videoId: string) => {
 		return null;
 	}
 
-	const [apiData, commentsData] = await Promise.all([apiResponse.json(), commentsResponse.json()]);
+	const results = await Promise.all([apiResponse.json(), commentsResponse.json()]);
+	const [apiData, commentsData] = results as [DailymotionApiResponse, DailymotionCommentsResponse];
 	return {
-		data: apiData as DailymotionApiResponse,
-		comments: commentsData as DailymotionCommentsResponse
+		data: apiData,
+		comments: commentsData
 	};
 };
 

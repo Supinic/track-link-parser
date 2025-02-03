@@ -95,7 +95,7 @@ export default class NicovideoParser extends Template {
 		return {
 			type: "nicovideo",
 			ID: data.video_id,
-			link: "https://www.nicovideo.jp/watch/" + data.video_id,
+			link: `https://www.nicovideo.jp/watch/${data.video_id}`,
 			name: data.title,
 			author: (data.user_nickname === null)
 				? null

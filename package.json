@@ -9,7 +9,14 @@
     "got": "^11.8.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.3"
+    "@eslint/js": "^9.19.0",
+    "@types/node": "^22.13.0",
+    "eslint": "^9.19.0",
+    "eslint-plugin-unicorn": "^56.0.1",
+    "globals": "^15.14.0",
+    "jiti": "^2.4.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.22.0"
   },
   "description": "Parses many various media sharing sites' links into a compact and standardized object data.",
   "engines": {
@@ -17,9 +24,12 @@
   },
   "scripts": {
     "build": "npx tsc",
-    "prepack": "npx tsc"
+    "prepack": "npx tsc",
+    "lint": "eslint index.ts parsers"
   },
-  "files": ["build"],
+  "files": [
+    "build"
+  ],
   "repository": "github:Supinic/track-link-parser",
   "main": "build/index.js",
   "name": "track-link-parser",

@@ -1,4 +1,4 @@
-import type { Template as TemplateParser, KeyOptions } from  "./parsers/template.js";
+import type { Template as TemplateParser, KeyOptions } from "./parsers/template.js";
 
 import BilibiliParser from "./parsers/bilibili.js";
 import DailymotionParser from "./parsers/dailymotion.js";

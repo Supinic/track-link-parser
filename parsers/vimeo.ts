@@ -67,7 +67,7 @@ export default class VimeoParser extends Template {
 			link: data.url,
 			name: data.title,
 			author: data.user_name,
-			authorID: "user" + data.user_id,
+			authorID: `user${data.user_id}`,
 			description: data.description,
 			duration: data.duration,
 			created: new Date(data.upload_date),
