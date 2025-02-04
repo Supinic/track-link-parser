@@ -38,8 +38,15 @@ export default class TrackLinkParser {
 		if (options.soundcloud) {
 			this.#parsers.soundcloud = new SoundcloudParser(options.soundcloud);
 		}
+		else {
+			console.warn("Souncloud options not provided - parser will not be available");
+		}
+
 		if (options.youtube) {
 			this.#parsers.youtube = new YoutubeParser(options.youtube);
+		}
+		else {
+			console.warn("YouTube options not provided - parser will not be available");
 		}
 	}
 
