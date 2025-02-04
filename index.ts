@@ -39,7 +39,7 @@ export default class TrackLinkParser {
 			this.#parsers.soundcloud = new SoundcloudParser(options.soundcloud);
 		}
 		else {
-			console.warn("Souncloud options not provided - parser will not be available");
+			console.warn("Soundcloud options not provided - parser will not be available");
 		}
 
 		if (options.youtube) {

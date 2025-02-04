@@ -109,7 +109,7 @@ type SoundcloudApiResponse = {
 	waveform_url: string;
 };
 
-interface SouncloudResponse extends GenericLinkParserResponse {
+interface SoundcloudResponse extends GenericLinkParserResponse {
 	extra: {
 		apiID: SoundcloudApiResponse["id"];
 		waveform: SoundcloudApiResponse["waveform_url"];
@@ -160,7 +160,7 @@ export default class SoundcloudParser extends Template {
 		return response.ok;
 	}
 
-	async fetchData (videoUrl: string): Promise<SouncloudResponse | null> {
+	async fetchData (videoUrl: string): Promise<SoundcloudResponse | null> {
 		const response = await soundcloudFetch(videoUrl, this.#key);
 		if (!response.ok) {
 			return null;

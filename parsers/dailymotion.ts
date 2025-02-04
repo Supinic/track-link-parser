@@ -103,7 +103,7 @@ export default class DailymotionParser extends Template {
 		return {
 			type: "dailymotion",
 			ID: data.id,
-			link: `https://dailymotion.com/${data.id}`,
+			link: `https://dailymotion.com/video/${data.id}`,
 			name: data.title,
 			author: data["owner.screenname"],
 			authorID: data.owner,
