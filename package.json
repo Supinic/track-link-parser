@@ -4,9 +4,6 @@
     "email": "supinic@pm.me"
   },
   "deprecated": false,
-  "dependencies": {
-    "fast-xml-parser": "^4.5.1"
-  },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@types/node": "^22.13.0",

@@ -1,49 +1,136 @@
 import { Template, GenericLinkParserResponse } from "./template.js";
-import { parse as parseXml } from "fast-xml-parser";
 
-type NicovideoTag = string | { _lock: string; __text: string; };
 type NicovideoApiResponse = {
-	comment_num: string;
-	description: string;
-	first_retrieve: string;
-	genre: string;
-	last_res_body: string;
-	length: string;
-	movie_type: string;
-	mylist_counter: string;
-	no_live_play: string;
-	size_high: string;
-	size_low: string;
-	tags: {
-		tag: NicovideoTag[];
-		_domain: string;
+	ads: unknown;
+	category: unknown;
+	channel: unknown;
+	client: Record<string, unknown>;
+	comment: Record<string, unknown>;
+	community: unknown;
+	easyComment: {
+		phrases: {
+			nicodic: {
+				link: string;
+				summary: string;
+				title: string;
+				viewTitle: string;
+			};
+			text: string;
+		}[];
 	};
-	thumb_type: string;
-	thumbnail_url: string;
-	title: string;
-	user_icon_url: string;
-	user_id: string;
-	user_nickname: string;
-	video_id: string;
-	view_counter: string;
-	watch_url: string;
+	external: unknown;
+	genre: {
+		isDisabled: boolean;
+		isImmoral: boolean;
+		isNotSet: boolean;
+		key: string;
+		label: string;
+	};
+	marquee: unknown;
+	media: Record<string, unknown>;
+	okReason: string;
+	owner: {
+		channel: unknown;
+		iconUrl: string;
+		id: number;
+		isMyListsPublice: boolean;
+		isVideosPublice: boolean;
+		live: boolean | null;
+		nickname: string;
+		videoLiveNotice: unknown;
+		viewer: number | null;
+	};
+	payment: Record<string, unknown>;
+	pcWatchPage: unknown;
+	player: Record<string, unknown>;
+	ppv: unknown;
+	ranking: {
+		genre: string | null;
+		popularTag: unknown[];
+	};
+	series: unknown;
+	smartphone: unknown;
+	system: Record<string, unknown>;
+	tag: {
+		edit: {
+			editKey: unknown;
+			isEditable: boolean;
+			uneditableReason: string;
+		};
+		hasR18Tag: boolean;
+		isPublishedNicoscript: boolean;
+		items: {
+			name: string;
+			isCategory: boolean;
+			isCategoryCandidate: boolean;
+			isLocked: boolean;
+			isNicodicArticleExists: boolean;
+		}[];
+	};
+	video: {
+		"9d091f87": boolean;
+		commentableUserTypeForPayment: string;
+		count: {
+			view: number;
+			comment: number;
+			mylist: number;
+			like: number;
+		};
+		description: string;
+		duration: number;
+		id: string;
+		isAuthenticationRequired: boolean;
+		isDeleted: boolean;
+		isEmbedPlayerAllowed: boolean;
+		isGiftAllowed: boolean;
+		isNoBanner: boolean;
+		isPrivate: boolean;
+		rating: {
+			isAdult: boolean;
+		};
+		registeredAt: string;
+		thumbnail: {
+			ogp: string;
+			player: string;
+			url: string;
+			middleUrl: string | null;
+			largeUrl: string | null;
+		};
+		title: string;
+		viewer: unknown;
+		watchableUserTypeForPayment: string;
+	};
+	videoAds: Record<string, unknown>;
+	videoLive: unknown;
+	viewer: unknown;
+	waku: Record<string, unknown>;
 };
 type NicovideoApiWrapper = {
-	nicovideo_thumb_response: {
-		thumb: NicovideoApiResponse;
-		_status: string;
-		error?: string;
+	meta: {
+		status: number;
 	};
+	data: NicovideoApiResponse;
 };
 
 interface NicovideoResponse extends GenericLinkParserResponse {
 	extra: {
-		tags: string[]
+		genre: NicovideoApiResponse["genre"]["key"];
+		nsfw: boolean;
+		tags: string[];
 	};
 }
 
+const baseUrl = "https://www.nicovideo.jp/api/watch/v3_guest";
 const nicovideoFetch = async (videoId: string) => {
-	const url = new URL(`https://ext.nicovideo.jp/api/getthumbinfo/${videoId}`);
+	// The Nicovideo API expects a random numerical value - use Date.now() to generate a pseudo-random sequence.
+	const randomPart = Date.now().toString();
+	const url = new URL(`${baseUrl}/${videoId}`);
+	url.search = new URLSearchParams({
+		_frontendId: "6",
+		_frontendVersion: "0",
+		actionTrackId: `AAAAAAAAAA_${randomPart}`
+	}).toString();
+
 	return await fetch(url);
 };
 
@@ -67,15 +154,7 @@ export default class NicovideoParser extends Template {
 
 	async checkAvailable (videoID: string) {
 		const response = await nicovideoFetch(videoID);
-		if (!response.ok) {
-			return false;
-		}
-
-		const xml = await response.text();
-		const rawData = parseXml(xml) as NicovideoApiWrapper;
-		const data = rawData.nicovideo_thumb_response;
-
-		return (!data.error);
+		return response.ok;
 	}
 
 	async fetchData (videoID: string): Promise<NicovideoResponse | null> {
@@ -84,34 +163,25 @@ export default class NicovideoParser extends Template {
 			return null;
 		}
 
-		const xml = await response.text();
-		const rawData = parseXml(xml) as NicovideoApiWrapper;
-		const wrapData = rawData.nicovideo_thumb_response;
-		if (wrapData.error) {
-			return null;
-		}
-
-		const data = wrapData.thumb;
+		const { data } = await response.json() as NicovideoApiWrapper;
 		return {
 			type: "nicovideo",
-			ID: data.video_id,
-			link: `https://www.nicovideo.jp/watch/${data.video_id}`,
-			name: data.title,
-			author: (data.user_nickname === null)
-				? null
-				: String(data.user_nickname),
-			authorID: data.user_id,
-			description: data.description,
-			duration: data.length.split(":").map(Number).reduce((acc, cur, ind) => (ind === 0) ? acc + cur * 60 : acc + cur, 0),
-			created: new Date(data.first_retrieve),
-			views: (data.view_counter) ? Number(data.view_counter) : null,
-			comments: (data.comment_num) ? Number(data.comment_num) : null,
-			likes: (data.mylist_counter) ? Number(data.mylist_counter) : null,
-			thumbnail: data.thumbnail_url || null,
+			ID: data.video.id,
+			link: `https://www.nicovideo.jp/watch/${data.video.id}`,
+			name: data.video.title,
+			author: data.owner.nickname,
+			authorID: data.owner.id,
+			description: data.video.description,
+			duration: data.video.duration,
+			created: new Date(data.video.registeredAt),
+			views: data.video.count.view,
+			comments: data.video.count.comment,
+			likes: data.video.count.like,
+			thumbnail: data.video.thumbnail.url,
 			extra: {
-				tags: (data.tags)
-					? data.tags.tag.map(i => (typeof i === "string") ? i : i.__text)
-					: []
+				genre: data.genre.key,
+				nsfw: data.video.rating.isAdult,
+				tags: data.tag.items.map(i => i.name)
 			}
 		};
 	}
