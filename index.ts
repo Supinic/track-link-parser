@@ -17,7 +17,7 @@ const PARSER_CONSTRUCTORS = {
 	youtube: YoutubeParser
 } as const;
 
-type ParserName = keyof typeof PARSER_CONSTRUCTORS;
+export type ParserName = keyof typeof PARSER_CONSTRUCTORS;
 type TrackLinkParserOptions = Partial<{
 	soundcloud: KeyOptions;
 	youtube: KeyOptions;
