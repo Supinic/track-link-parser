@@ -3,7 +3,7 @@ import { KeyOptions, Template, GenericLinkParserResponse } from "./template.js";
 interface YoutubeParserResponse extends GenericLinkParserResponse {
 	extra: {
 		favourites: number;
-		rawLength: YoutubeItem["contentDetails"]["duration"];
+		rawLength: YoutubeItem["contentDetails"]["duration"] | null;
 		tags: YoutubeItem["snippet"]["tags"];
 		privacy: YoutubeItem["status"]["privacyStatus"];
 	};
@@ -29,7 +29,7 @@ type YoutubeItem = {
 		contentRating: unknown;
 		definition: string;
 		dimension: "2d" | "3d";
-		duration: string;
+		duration: string | null;
 		licensedContent: boolean;
 		projection: string;
 	};
@@ -157,7 +157,7 @@ export default class YoutubeParser extends Template {
 			authorID: data.snippet.channelId,
 			description: data.snippet.description,
 			created: new Date(data.snippet.publishedAt),
-			duration: (data.contentDetails.duration === "P0D")
+			duration: (!data.contentDetails.duration || data.contentDetails.duration === "P0D")
 				? null
 				: YoutubeParser.parseDuration(data.contentDetails.duration),
 			views: Number(data.statistics.viewCount),
@@ -166,7 +166,7 @@ export default class YoutubeParser extends Template {
 			thumbnail: YoutubeParser.pickBestThumbnail(data.snippet.thumbnails),
 			extra: {
 				favourites: Number(data.statistics.favoriteCount),
-				rawLength: data.contentDetails.duration,
+				rawLength: data.contentDetails.duration ?? null,
 				tags: data.snippet.tags,
 				privacy: data.status.privacyStatus
 			}
